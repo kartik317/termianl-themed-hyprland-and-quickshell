@@ -1,0 +1,303 @@
+import Quickshell
+import Quickshell.Wayland
+import Quickshell.Hyprland
+import Quickshell.Io
+import QtQuick
+import QtQuick.Layouts
+import "../theme"
+import "../state"
+
+PanelWindow {
+    id: root
+
+    property var screen
+
+    // ── Keyboard selection state ─────────────────────────────────────────────
+    property int selectedIndex: -1
+    readonly property int buttonCount: 5
+
+    function activateSelected() {
+        switch (selectedIndex) {
+            case 0: runAndClose(procLock); break;
+            case 1: runAndClose(procSuspend); break;
+            case 2: runAndClose(procHibernate); break;
+            case 3: runAndClose(procReboot); break;
+            case 4: runAndClose(procShutdown); break;
+        }
+    }
+
+    // Reset selection / grab focus on visibility change
+    Connections {
+        target: PowerMenuState
+        function onPowerVisibleChanged() {
+            if (PowerMenuState.powerVisible)
+                powerCard.forceActiveFocus()
+            else
+                root.selectedIndex = -1
+        }
+    }
+
+    IpcHandler {
+        target: "powermenu"
+        function toggle() {
+            PowerMenuState.toggle();
+        }
+    }
+
+    // ── Layer / geometry ─────────────────────────────────────────────────────
+    anchors {
+	top: true
+	bottom: true
+	left: true
+	right: true
+    }
+
+    mask: Region {
+	item: PowerMenuState.powerVisible ? maskCover : null
+    }
+
+    Item {
+	id: maskCover
+	anchors.fill: parent
+    }
+
+    color: "transparent"
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: PowerMenuState.powerVisible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.namespace: "qs-powermenu-noanim"
+
+    // ── Slide offset ─────────────────────────────────────────────────────────
+    property real slideOffset: PowerMenuState.powerVisible ? 0 : powerCard.width + 8
+    Behavior on slideOffset {
+        NumberAnimation { duration: 300; easing.type: Easing.OutQuint }
+    }
+
+    // ── Process runners ──────────────────────────────────────────────────────
+    Process {
+        id: procLock
+        command: ["loginctl", "lock-session"]
+    }
+    Process {
+        id: procSuspend
+        command: ["systemctl", "suspend"]
+    }
+    Process {
+        id: procHibernate
+        command: ["systemctl", "hibernate"]
+    }
+    Process {
+        id: procReboot
+        command: ["systemctl", "reboot"]
+    }
+    Process {
+        id: procShutdown
+        command: ["systemctl", "poweroff"]
+    }
+
+    function runAndClose(proc) {
+        PowerMenuState.hide();
+        proc.running = true;
+    }
+
+    MouseArea {
+	anchors.fill: parent
+	enabled: PowerMenuState.powerVisible
+	onClicked: PowerMenuState.hide()
+    }
+
+    // ── Menu card ────────────────────────────────────────────────────────────
+    Rectangle {
+        id: powerCard
+
+        focus: true
+
+        // ── Key handling ──
+        Keys.onPressed: function(event) {
+            if (!PowerMenuState.powerVisible) return;
+            if (event.key === Qt.Key_Up) {
+                root.selectedIndex = (root.selectedIndex - 1 + root.buttonCount) % root.buttonCount;
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Down) {
+                root.selectedIndex = (root.selectedIndex + 1) % root.buttonCount;
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                if (root.selectedIndex >= 0) root.activateSelected();
+                event.accepted = true;
+            }
+        }
+        Keys.onEscapePressed: PowerMenuState.hide()
+
+        anchors.verticalCenter: parent.verticalCenter
+
+        // Shift left by 1px when fully open to hide the left boundary border
+        x: -root.slideOffset - 1
+
+        width: 200
+        height: menuCol.implicitHeight + 32
+
+        topLeftRadius: 0
+        bottomLeftRadius: 0
+        topRightRadius: 0
+	bottomRightRadius: 0
+
+	border.color: Qt.alpha(Colors.colCyan, 0.8)
+	border.width: 1
+
+        color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.85) 
+
+        // Border overlay (Top, Right, and Bottom visible; Left clipped off-screen)
+        Rectangle {
+            anchors {
+                top: parent.top
+                bottom: parent.bottom
+                right: parent.right
+                left: parent.left
+                leftMargin: -1 // Extends overlay 1px past the left screen edge
+            }
+            z: 1
+            color: "transparent"
+            topLeftRadius: 0
+            bottomLeftRadius: 0
+            topRightRadius: parent.topRightRadius
+            bottomRightRadius: parent.bottomRightRadius
+            border.color: Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.08)
+            border.width: 1
+        }
+
+        // Eat clicks so background doesn't dismiss on card clicks
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {}
+        }
+
+        ColumnLayout {
+            id: menuCol
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                margins: 16
+                topMargin: 16
+            }
+            spacing: 6
+
+            Text {
+                Layout.fillWidth: true
+                text: "POWER"
+                color: Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.35)
+                font.pixelSize: 10
+                font.letterSpacing: 3
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Item { Layout.preferredHeight: 4 }
+
+            PowerButton {
+                label: "Lock"
+                icon: "󰌾"
+                hoverColor: Colors.colCyan
+                selected: root.selectedIndex === 0
+                onActivated: root.runAndClose(procLock)
+            }
+            PowerButton {
+                label: "Suspend"
+                icon: "󰒲"
+                hoverColor: Colors.colBlue
+                selected: root.selectedIndex === 1
+                onActivated: root.runAndClose(procSuspend)
+            }
+            PowerButton {
+                label: "Hibernate"
+                icon: "󰋊"
+                hoverColor: Colors.colPurple
+                selected: root.selectedIndex === 2
+                onActivated: root.runAndClose(procHibernate)
+            }
+            PowerButton {
+                label: "Reboot"
+                icon: "󰜉"
+                hoverColor: Colors.colYellow
+                selected: root.selectedIndex === 3
+                onActivated: root.runAndClose(procReboot)
+            }
+            PowerButton {
+                label: "Shutdown"
+                icon: "󰐥"
+                hoverColor: Colors.colRed
+                selected: root.selectedIndex === 4
+                onActivated: root.runAndClose(procShutdown)
+            }
+
+            Item { Layout.preferredHeight: 2 }
+        }
+    }
+    // ── Inner component: one menu row ────────────────────────────────────────
+    component PowerButton: Rectangle {
+        id: btn
+        required property string label
+        required property string icon
+        required property color hoverColor
+        property bool selected: false
+        signal activated
+
+        Layout.fillWidth: true
+        height: 44
+        radius: 0
+
+        color: (ma.containsMouse || selected)
+               ? Qt.rgba(hoverColor.r, hoverColor.g, hoverColor.b, 0.15)
+               : "transparent"
+
+        Behavior on color { ColorAnimation { duration: 60 } }
+
+        Rectangle {
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+            }
+            width: (ma.containsMouse || btn.selected) ? 3 : 0
+            height: 22
+            radius: 0
+            color: btn.hoverColor
+            Behavior on width {
+                NumberAnimation { duration: 60; easing.type: Easing.OutCubic }
+            }
+        }
+
+        Row {
+            anchors {
+                left: parent.left
+                verticalCenter: parent.verticalCenter
+                leftMargin: 14
+            }
+            spacing: 12
+
+            Text {
+                text: btn.icon
+                color: Colors.colBlue
+                font.pixelSize: 18
+                verticalAlignment: Text.AlignVCenter
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            Text {
+                text: btn.label
+                color: Colors.colBlue
+                font.pixelSize: 14
+                font.weight: Font.Medium
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        MouseArea {
+            id: ma
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: btn.activated()
+        }
+
+        scale: ma.pressed ? 0.96 : 1.0
+        Behavior on scale { NumberAnimation { duration: 100; easing.type: Easing.OutQuint } }
+    }
+}
