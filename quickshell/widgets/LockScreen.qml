@@ -3,12 +3,21 @@ import Quickshell.Wayland
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Effects // Built-in Qt 6 replacement for FastBlur
+import QtQuick.Effects
 
 import "../state"
 
 WlSessionLock {
     id: lock
+
+    // ── customize these ────────────────────────────────────────
+    readonly property string promptUser: "thelinuxguy"
+    readonly property string timezoneLabel: "IST"
+    readonly property color termGreen: "#50FA7B"
+    readonly property color termDim: Qt.rgba(1, 1, 1, 0.55)
+    readonly property color termFg: "#F8F8F2"
+    readonly property string termFont: "JetBrainsMono Nerd Font"
+    // ────────────────────────────────────────────────────────────
 
     locked: LockScreenState.locked
     onLockedChanged: {
@@ -25,14 +34,8 @@ WlSessionLock {
             anchors.fill: parent
             color: "#000000"
 
-            // Main surface fade-in / fade-out animation
-            opacity: LockScreenState.locked ? 1 : 0
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 350
-                    easing.type: Easing.OutCubic
-                }
-            }
+            // Snaps in and out instantly
+            visible: LockScreenState.locked
 
             // Background Wallpaper
             Image {
@@ -47,170 +50,185 @@ WlSessionLock {
                 sourceSize.width: surface.width
                 sourceSize.height: surface.height
 
-                visible: false // Hidden so MultiEffect can render the blurred version
+                visible: false
             }
 
-            // Modern Qt 6 Blur Effect
             MultiEffect {
                 id: blurredWallpaper
                 anchors.fill: wallpaper
                 source: wallpaper
                 blurEnabled: true
-                blur: 0.8
-                blurMax: 32
+                blur: 0.9
+                blurMax: 48
 
                 visible: wallpaper.status === Image.Ready
             }
 
-            // Dark overlay for contrast
+            // Heavier dark overlay so the terminal text pops
             Rectangle {
                 anchors.fill: parent
                 color: "#000000"
-                opacity: 0.45
+                opacity: 0.65
             }
 
-            // Lock Card UI
+            // ── Terminal card ─────────────────────────────────────
             Item {
                 id: card
-                width: 320
+                // Wraps exactly around the text for perfect visual centering
+                width: contentColumn.implicitWidth
                 height: contentColumn.height
                 anchors.centerIn: parent
 
-                property real baseX: (parent.width - width) / 2
-                property real animOffsetX: 0
-
-                transform: Translate { x: card.animOffsetX }
-
-                // Smooth scale and subtle vertical float transition
-                opacity: LockScreenState.locked ? 1 : 0
-                scale: LockScreenState.locked ? 1.0 : 0.92
-                y: LockScreenState.locked ? (parent.height - height) / 2 : (parent.height - height) / 2 + 15
-                
-                Behavior on opacity { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
-                Behavior on scale { 
-                    NumberAnimation { 
-                        duration: 350
-                        easing.type: Easing.OutBack
-                        easing.overshoot: 1.2
-                    } 
-                }
-                Behavior on y { NumberAnimation { duration: 350; easing.type: Easing.OutCubic } }
-
-                SequentialAnimation {
-                    id: shakeAnim
-                    loops: 1
-                    NumberAnimation { target: card; property: "animOffsetX"; to: -12; duration: 50; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: card; property: "animOffsetX"; to: 12; duration: 50; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: card; property: "animOffsetX"; to: -8; duration: 50; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: card; property: "animOffsetX"; to: 8; duration: 50; easing.type: Easing.OutQuad }
-                    NumberAnimation { target: card; property: "animOffsetX"; to: 0; duration: 50; easing.type: Easing.OutQuad }
+                // live "date" command output
+                function formatDateLine(d) {
+                    var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+                    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                    var dow = days[d.getDay()]
+                    var mon = months[d.getMonth()]
+                    var dom = d.getDate() < 10 ? " " + d.getDate() : "" + d.getDate()
+                    var h = d.getHours()
+                    var ampm = h >= 12 ? "PM" : "AM"
+                    var h12 = h % 12; if (h12 === 0) h12 = 12
+                    var hh = h12 < 10 ? "0" + h12 : "" + h12
+                    var mi = d.getMinutes() < 10 ? "0" + d.getMinutes() : "" + d.getMinutes()
+                    var ss = d.getSeconds() < 10 ? "0" + d.getSeconds() : "" + d.getSeconds()
+                    return dow + " " + mon + " " + dom + " " + hh + ":" + mi + ":" + ss + " " + ampm
+                        + (lock.timezoneLabel.length ? " " + lock.timezoneLabel : "") + " " + d.getFullYear()
                 }
 
                 Column {
                     id: contentColumn
-                    width: parent.width
-                    spacing: 20
+                    spacing: 6
 
-                    Column {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: 4
-
+                    // ❯ date
+                    Row {
+                        spacing: 8
                         Text {
-                            id: clockText
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: Qt.formatTime(currentTime, "hh:mm")
-                            font.pixelSize: 80
-                            font.weight: Font.Thin
-                            color: "#FFFFFF"
-
-                            property date currentTime: new Date()
-
-                            Timer {
-                                interval: 1000
-                                running: true
-                                repeat: true
-                                onTriggered: clockText.currentTime = new Date()
-                            }
-                        }
-
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: Qt.formatDate(new Date(), "dddd, MMMM d")
+                            text: "❯"
+                            font.family: lock.termFont
                             font.pixelSize: 16
-                            font.weight: Font.Medium
-                            color: Qt.rgba(1, 1, 1, 0.75)
+                            font.bold: true
+                            color: lock.termGreen
+                        }
+                        Text {
+                            text: "date"
+                            font.family: lock.termFont
+                            font.pixelSize: 16
+                            color: lock.termFg
                         }
                     }
 
-                    Item { height: 12; width: 1 }
+                    // date output
+                    Text {
+                        id: dateLine
+                        text: card.formatDateLine(currentTime)
+                        font.family: lock.termFont
+                        font.pixelSize: 15
+                        color: lock.termDim
 
-                    Rectangle {
-                        id: fieldWrap
-                        width: parent.width
-                        height: 50
-                        radius: 14
-                        color: Qt.rgba(0, 0, 0, 0.5)
-                        border.width: pwField.activeFocus ? 2 : (LockScreenState.authFailed ? 2 : 1)
-                        border.color: LockScreenState.authFailed 
-                            ? Colors.colRed 
-                            : (pwField.activeFocus ? Colors.colFg : Qt.rgba(1, 1, 1, 0.15))
+                        property date currentTime: new Date()
+                        Timer {
+                            interval: 1000
+                            running: true
+                            repeat: true
+                            onTriggered: dateLine.currentTime = new Date()
+                        }
+                    }
 
-                        Behavior on border.color { ColorAnimation { duration: 200 } }
-                        Behavior on border.width { NumberAnimation { duration: 150 } }
+                    Item { height: 14; width: 1 }
 
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 16
-                            anchors.rightMargin: 16
-                            spacing: 10
+                    // ~ thelinuxguy
+                    Row {
+                        spacing: 8
+                        Text {
+                            text: "~"
+                            font.family: lock.termFont
+                            font.pixelSize: 16
+                            font.bold: true
+                            color: "#8BE9FD"
+                        }
+                        Text {
+                            text: lock.promptUser
+                            font.family: lock.termFont
+                            font.pixelSize: 16
+                            color: lock.termFg
+                        }
+                    }
 
-                            TextField {
-                                id: pwField
-                                Layout.fillWidth: true
-                                echoMode: TextInput.Password
-                                enabled: !LockScreenState.authenticating
-                                placeholderText: LockScreenState.authenticating ? "Verifying..." : "Enter Password"
-                                placeholderTextColor: Qt.rgba(1, 1, 1, 0.4)
-                                color: "#FFFFFF"
-                                background: null
-                                font.pixelSize: 15
-                                verticalAlignment: TextInput.AlignVCenter
+                    Item { height: 6; width: 1 }
 
-                                onAccepted: {
-                                    if (text.length > 0)
-                                        LockScreenState.authenticate(text)
+                    // Password: <input>
+                    Row {
+                        spacing: 0
+                        Text {
+                            text: "Password: "
+                            font.family: lock.termFont
+                            font.pixelSize: 16
+                            // Color changes to red instantly on failure
+                            color: LockScreenState.authFailed ? Colors.colRed : lock.termFg
+                        }
+
+                        TextInput {
+                            id: pwField
+                            width: 220
+                            font.family: lock.termFont
+                            font.pixelSize: 16
+                            color: lock.termFg
+                            echoMode: TextInput.Password
+                            passwordCharacter: "•"
+                            passwordMaskDelay: 120
+                            selectByMouse: true
+                            enabled: !LockScreenState.authenticating
+                            clip: true
+
+                            cursorVisible: true
+                            cursorDelegate: Rectangle {
+                                id: termCursor
+                                width: 9
+                                height: pwField.font.pixelSize + 2
+                                color: lock.termGreen
+                                
+                                // Hard terminal blink instead of smooth fade
+                                Timer {
+                                    interval: 500
+                                    running: true
+                                    repeat: true
+                                    onTriggered: termCursor.visible = !termCursor.visible
                                 }
                             }
 
-                            BusyIndicator {
-                                visible: LockScreenState.authenticating
-                                running: LockScreenState.authenticating
-                                implicitWidth: 18
-                                implicitHeight: 18
+                            onAccepted: {
+                                if (text.length > 0)
+                                    LockScreenState.authenticate(text)
                             }
+                        }
+
+                        BusyIndicator {
+                            visible: LockScreenState.authenticating
+                            running: LockScreenState.authenticating
+                            implicitWidth: 16
+                            implicitHeight: 16
                         }
                     }
 
+                    // bash-style error line
                     Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "Incorrect password"
-                        color: Colors.colRed
+                        text: "bash: authentication failed"
+                        font.family: lock.termFont
                         font.pixelSize: 13
-                        font.weight: Font.Medium
-                        opacity: LockScreenState.authFailed ? 1 : 0
-
-                        Behavior on opacity {
-                            NumberAnimation { duration: 200; easing.type: Easing.InOutSine }
-                        }
+                        color: Colors.colRed
+                        // Appears instantly
+                        visible: LockScreenState.authFailed 
                     }
                 }
             }
+            // ──────────────────────────────────────────────────────
 
             Connections {
                 target: LockScreenState
                 function onAuthFailedChanged() {
                     if (LockScreenState.authFailed) {
-                        shakeAnim.start()
+                        // Shake animation removed. Input just clears instantly.
                         pwField.text = ""
                         pwField.forceActiveFocus()
                     }

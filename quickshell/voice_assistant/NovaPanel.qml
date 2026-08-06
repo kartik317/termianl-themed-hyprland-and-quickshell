@@ -56,7 +56,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: 18
+        radius: 0
         color: Colors.colBg
         opacity: 0.55
         border.color: Colors.colFg
