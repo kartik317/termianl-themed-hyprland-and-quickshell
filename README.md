@@ -3,7 +3,7 @@
 A custom Hyprland and Quickshell setup for a polished Linux desktop experience. This configuration includes:
 
 - `hypr/`: Hyprland config files, automation scripts, and helper modules
-- `quickshell/`: QML-based shell UI components and widgets
+- `quickshell/`: Quickshell shell UI components and widgets
 
 ## Overview
 
