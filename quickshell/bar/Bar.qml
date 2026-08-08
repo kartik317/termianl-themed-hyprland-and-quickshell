@@ -3,8 +3,9 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
+import "./media_controls"
 import "../theme"
-import "../state"
+
 PanelWindow {
     id: root
     Process {

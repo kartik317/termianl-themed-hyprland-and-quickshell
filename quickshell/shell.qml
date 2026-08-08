@@ -2,9 +2,14 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick
-import "./state"
-import "./bar"
 import Quickshell.Io
+import "./bar"
+import "./wallpaper_switcher"
+import "./live_wallpaper_switcher"
+import "./lock_screen"
+import "./power_menu"
+import "./app_launcher"
+import "./brightness_controls"
 import "./widgets"
 import "./wallpaper_clock"
 import "./voice_assistant"

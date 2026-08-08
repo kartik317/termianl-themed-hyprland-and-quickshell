@@ -2,7 +2,6 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 import "../theme"
-import "../state"
 import Quickshell.Services.UPower
 
 RowLayout {
