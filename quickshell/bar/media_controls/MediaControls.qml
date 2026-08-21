@@ -15,7 +15,23 @@ Item {
         anchors.centerIn: parent
         // Allow the row layout to constrain itself within the root width minus horizontal padding
         width: Math.min(implicitWidth, root.width - 24)
-        spacing: 10
+	spacing: 10
+
+	// Cycle player source
+        Text {
+            text: "\uf443" 
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: 14
+            color: MediaState.players.length > 1 ? Colors.colFg : Colors.colBrightBlack
+            visible: MediaState.players.length > 1
+
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -4
+                cursorShape: Qt.PointingHandCursor
+                onClicked: MediaState.cyclePlayer()
+            }
+        }
 
         // Album art
         Rectangle {
