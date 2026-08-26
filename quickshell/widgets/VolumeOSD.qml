@@ -26,7 +26,6 @@ PanelWindow {
     anchors.right:  true
     implicitHeight: 100
 
-    // magic code :)
     mask: Region {
         item: osdCard
     }
@@ -60,7 +59,6 @@ PanelWindow {
         }
         stdout: SplitParser {
             onRead: data => {
-                // "Event 'change' on sink #0"
                 if (data.includes("change") && data.includes("sink") && !volQuery.running)
                     volQuery.running = true
             }
@@ -91,77 +89,79 @@ PanelWindow {
         }
     }
 
-    // ── Slide-up animation ─────────────────────────────────────────────────
-    property real slideOffset: osdVisible ? 0 : 80
-    Behavior on slideOffset {
-        NumberAnimation { duration: 300; easing.type: Easing.OutQuint }
-    }
-
     // ═══════════════════════════════════════════════════════════════════════
-    //  OSD card
+    //  OSD card — instant show/hide, no slide/fade
     // ═══════════════════════════════════════════════════════════════════════
     Rectangle {
         id: osdCard
-        width:  240
+        width:  340
         height: 56
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom:           parent.bottom
-	anchors.bottomMargin:     22
+        anchors.bottomMargin:     22
 
-        border.color: Qt.alpha(Colors.colCyan, 0.8)
-	border.width: 1
-
-        transform: Translate { y: root.slideOffset }
-        opacity:   root.osdVisible ? 1.0 : 0.0
-        Behavior on opacity { NumberAnimation { duration: 220 } }
+        visible: root.osdVisible
 
         radius: 0
-        color:  Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.85)
+        color: "transparent"
+        border.color: Colors.colCyan
+        border.width: 1
 
+        // ── Inner fill (matches launcher/power menu/brightness panel) ───────
         Rectangle {
-            anchors.fill: parent; z: 1; radius: parent.radius
-            color: "transparent"
-            border.color: Qt.alpha(Colors.colFg, 0.10)
-            border.width: 1
-        }
+            anchors.fill: parent
+            anchors.margins: 1
+            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.8)
+            radius: 0
+            clip: true
 
-        RowLayout {
-            anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
-            spacing: 12
+            RowLayout {
+                anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
+                spacing: 12
 
-            Text {
-                text: root.muted    ? "\uf026"
-                    : root.vol > 60 ? "\uf028"
-                    : root.vol > 0  ? "\uf027"
-                    :                 "\uf026"
-                font.pixelSize: 18
-                font.family:    "JetBrainsMono Nerd Font"
-                color: root.muted ? Colors.colRed : Colors.colBlue
-                Behavior on color { ColorAnimation { duration: 150 } }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                height: 5; radius: 0
-                color: Qt.alpha(Colors.colFg, 0.12)
-                Rectangle {
-                    width:  parent.width * Math.min(root.vol / 100.0, 1.0)
-                    height: parent.height; radius: parent.radius
-                    color:  root.muted ? Colors.colRed : Colors.colBlue
-                    Behavior on width { NumberAnimation { duration: 80  } }
-                    Behavior on color { ColorAnimation  { duration: 150 } }
+                Text {
+                    text: root.muted    ? "\uf026"
+                        : root.vol > 60 ? "\uf028"
+                        : root.vol > 0  ? "\uf027"
+                        :                 "\uf026"
+                    font.pixelSize: 16
+                    font.family:    "JetBrainsMono Nerd Font"
+                    color: root.muted ? Colors.colRed : Colors.colBlue
                 }
-            }
 
-            Text {
-                text:                  root.muted ? "Muted" : root.vol + "%"
-                font.pixelSize:        12
-                font.weight:           Font.Medium
-                color:                 Colors.colFg
-                Layout.preferredWidth: 44
-                horizontalAlignment:   Text.AlignRight
+                // ── Segmented volume meter (matches brightness slider style) ──
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 3
+
+                    readonly property int segments: 20
+                    readonly property int filledSegments: Math.round(Math.min(root.vol / 100.0, 1.0) * segments)
+
+                    Repeater {
+                        model: parent.segments
+                        delegate: Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 10
+                            radius: 0
+                            border.width: 1
+                            border.color: Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.1)
+                            color: index < parent.filledSegments
+                                   ? (root.muted ? Colors.colRed : Colors.colBlue)
+                                   : Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.12)
+                        }
+                    }
+                }
+
+                Text {
+                    text:                  root.muted ? "MUTE" : root.vol + "%"
+                    font.pixelSize:        12
+                    font.family:           "JetBrainsMono Nerd Font"
+                    font.weight:           Font.Bold
+                    color:                 Colors.colFg
+                    Layout.preferredWidth: 44
+                    horizontalAlignment:   Text.AlignRight
+                }
             }
         }
     }
 }
-
