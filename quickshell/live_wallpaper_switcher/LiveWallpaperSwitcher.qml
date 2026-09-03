@@ -10,7 +10,7 @@ PanelWindow {
 
     exclusiveZone: 0
 
-    WlrLayershell.namespace: "qs-liveWallpaperSwitcher"
+    WlrLayershell.namespace: "liveWallpaper-switcher"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: LiveWallpaperState.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
@@ -77,7 +77,7 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent
             anchors.margins: 1
-            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.8)
+            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.65)
             radius: 0
             clip: true
 

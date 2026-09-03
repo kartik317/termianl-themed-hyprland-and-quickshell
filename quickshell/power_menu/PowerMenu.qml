@@ -11,6 +11,8 @@ PanelWindow {
 
     property var screen
 
+    WlrLayershell.namespace: "powermenu"
+
     // ── Keyboard selection state ─────────────────────────────────────────────
     property int selectedIndex: -1
     readonly property int buttonCount: 5
@@ -65,8 +67,6 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: PowerMenuState.powerVisible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    WlrLayershell.namespace: "qs-powermenu-noanim"
-
     // ── Terminal palette setup (matches app launcher) ─────────────────────────
     readonly property color accentFill: Colors.colBlue
     readonly property color fgDim: Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.6)
@@ -133,7 +133,7 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent
             anchors.margins: 1
-            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.8)
+            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.65)
             radius: 0
             clip: true
 

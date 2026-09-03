@@ -17,7 +17,7 @@ PanelWindow {
 
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: AppLauncherState.launcherVisible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    WlrLayershell.namespace: "quickshell-launcher"
+    WlrLayershell.namespace: "app-launcher"
 
     anchors {
         top: true
@@ -143,7 +143,7 @@ PanelWindow {
 	    anchors.fill: parent
             anchors.margins: 1
             
-            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.8)
+            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.5)
             radius: 0
             clip: true
 
@@ -298,8 +298,8 @@ PanelWindow {
                                 Image {
                                     id: appIcon
                                     anchors.verticalCenter: parent.verticalCenter
-                                    width: 16
-                                    height: 16
+                                    width: 24
+                                    height: 24
                                     source: modelData.icon !== "" ? "image://icon/" + modelData.icon : ""
                                     smooth: false
                                     mipmap: false

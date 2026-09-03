@@ -92,5 +92,6 @@ Singleton {
 	function previous() { root.previous(); }
 	function shuffle() { root.toggleShuffle(); }
 	function loop() { root.cycleLoop(); }
+	function changePlayer() { root.cyclePlayer(); }
     }
 }

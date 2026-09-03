@@ -24,3 +24,39 @@ hl.layer_rule({
     match = { namespace = "waybar" },
     animation = "fade"
 })
+
+hl.layer_rule({
+    match = { namespace = "clock-widget" },
+    blur = true,
+    ignore_alpha = 0
+})
+
+hl.layer_rule({
+    match = { namespace = "bar" },
+    blur = true,
+    ignore_alpha = 0
+})
+
+hl.layer_rule({
+    match = { namespace = "app-launcher" },
+    blur = true,
+    ignore_alpha = 0
+})
+
+hl.layer_rule({
+    match = { namespace = "powermenu" },
+    blur = true,
+    ignore_alpha = 0
+})
+
+hl.layer_rule({
+    match = { namespace = "wallpaper-switcher" },
+    blur = true,
+    ignore_alpha = 0
+})
+
+hl.layer_rule({
+    match = { namespace = "liveWallpaper-switcher" },
+    blur = true,
+    ignore_alpha = 0
+})

@@ -35,7 +35,8 @@ ShellRoot {
             mask: Region {
                 item: ClockState.clockVisible ? draggableClock : null
             }
-            WlrLayershell.layer: WlrLayer.Bottom
+	    WlrLayershell.layer: WlrLayer.Bottom
+	    WlrLayershell.namespace: "clock-widget"
             visible: ClockState.clockVisible
             DraggableClock {
                 id: draggableClock

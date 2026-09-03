@@ -5,7 +5,6 @@ import QtQuick
 
 Singleton {
     id: root
-
     property bool visible: false
     property string wallpaperDir: "/home/kartik/Pictures/Wallpapers" 
     property var wallpapers: []

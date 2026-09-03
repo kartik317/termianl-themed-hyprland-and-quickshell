@@ -4,9 +4,9 @@
 if pgrep -x "waybar" > /dev/null; then
     # If running, kill it
     pkill -x "waybar"
-    echo "Waybar stopped"
+#    echo "Waybar stopped"
 else
     # If not running, start it
     waybar &
-    echo "Waybar started"
+#    echo "Waybar started"
 fi

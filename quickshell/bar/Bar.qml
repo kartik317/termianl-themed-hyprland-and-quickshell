@@ -12,6 +12,7 @@ PanelWindow {
         id: appLauncherProcess
         command: ["qs", "ipc", "call", "applauncher", "toggle"]
     }
+    WlrLayershell.namespace: "bar"
     anchors {
         top: true
         left: true
@@ -23,7 +24,7 @@ PanelWindow {
     readonly property string fontFamily: "JetBrainsMono Nerd Font"
     readonly property int fontSize: 14
     readonly property real pillRadius: 0
-    readonly property color pillBg: Qt.alpha(Colors.colBg, 0.85)
+    readonly property color pillBg: Qt.alpha(Colors.colBg, 0.65)
     RowLayout {
         anchors.fill: parent
         anchors.margins: 4

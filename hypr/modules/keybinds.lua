@@ -11,7 +11,7 @@ local menu        = "qs ipc call applauncher toggle"
 local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
-hl.bind(mainMod .. " + return", hl.dsp.exec_cmd(terminal .. " --hold sh -c 'fastfetch'"))
+hl.bind(mainMod .. " + K", hl.dsp.exec_cmd(terminal .. " --hold sh -c 'fastfetch'"))
 local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
 -- closeWindowBind:set_enabled(false)
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
@@ -32,7 +32,7 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc call lockscreen lock"))
 --hl.bind(mainMod .. " + period", hl.dsp.exec_cmd("wofi-emoji | wofi-copy"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("brave"))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("obsidian"))
-hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("blueman-manager"))
+hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("kitty -e bluetui"))
 hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-cava-bg.sh"))
 hl.bind("CTRL + M", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-glava.sh"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
@@ -50,12 +50,13 @@ hl.bind(mainMod .. " + SHIFT + period", hl.dsp.exec_cmd("qs ipc call media next"
 hl.bind(mainMod .. " + SHIFT + comma", hl.dsp.exec_cmd("qs ipc call media previous"))
 hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd("qs ipc call media loop"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("qs ipc call media shuffle"))
+hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("qs ipc call media changePlayer"))
 
 -- Apps shortcuts
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("qs ipc call appshortcuts off"))
 hl.bind(mainMod .. " + period", hl.dsp.exec_cmd("qs ipc call appshortcuts next"))
 hl.bind(mainMod .. " + comma", hl.dsp.exec_cmd("qs ipc call appshortcuts prev"))
-hl.bind(mainMod .. " + SHIFT + return", hl.dsp.exec_cmd("qs ipc call appshortcuts launch"))
+hl.bind(mainMod .. " + return", hl.dsp.exec_cmd("qs ipc call appshortcuts launch"))
 
 
 -- Voice assistant

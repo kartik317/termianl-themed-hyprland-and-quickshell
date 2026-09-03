@@ -17,7 +17,7 @@ RowLayout {
     Process { id: minecraftProcess; command: ["mcpelauncher-ui-qt"] }
     Process { id: steamProcess; command: ["steam"] }
     Process { id: braveProcess; command: ["brave"] }
-    Process { id: githubProcess; command: ["brave", "--app-id=mjoklplbddabcmpepnokjaffbmgbkkgg"] }
+    Process { id: ytMusicProcess; command: ["brave", "--app-id=cinhimbnkkaeohfgghhklpknlkffjgod"] }
 
     function launchIndex(idx) {
         switch (idx) {
@@ -26,7 +26,7 @@ RowLayout {
             case 2: minecraftProcess.running = true; break;
             case 3: steamProcess.running = true; break;
             case 4: braveProcess.running = true; break;
-            case 5: githubProcess.running = true; break;
+            case 5: ytMusicProcess.running = true; break;
         }
     }
 
@@ -67,7 +67,6 @@ RowLayout {
         Layout.preferredWidth: 20
         Layout.preferredHeight: 20
         color: (root.isSelecting && root.selectedIndex === 0) ? Colors.colFg : "transparent"
-        radius: 4
 
         Text {
             anchors.centerIn: parent
@@ -89,7 +88,6 @@ RowLayout {
         Layout.preferredWidth: 20
         Layout.preferredHeight: 20
         color: (root.isSelecting && root.selectedIndex === 1) ? Colors.colFg : "transparent"
-        radius: 4
 
         Text {
             anchors.centerIn: parent
@@ -111,7 +109,6 @@ RowLayout {
         Layout.preferredWidth: 20
         Layout.preferredHeight: 20
         color: (root.isSelecting && root.selectedIndex === 2) ? Colors.colFg : "transparent"
-        radius: 4
 
         Text {
             anchors.centerIn: parent
@@ -133,7 +130,6 @@ RowLayout {
         Layout.preferredWidth: 20
         Layout.preferredHeight: 20
         color: (root.isSelecting && root.selectedIndex === 3) ? Colors.colFg : "transparent"
-        radius: 4
 
         Text {
             anchors.centerIn: parent
@@ -155,7 +151,6 @@ RowLayout {
         Layout.preferredWidth: 20
         Layout.preferredHeight: 20
         color: (root.isSelecting && root.selectedIndex === 4) ? Colors.colFg : "transparent"
-        radius: 4
 
         Text {
             anchors.centerIn: parent
@@ -172,16 +167,15 @@ RowLayout {
         }
     }
 
-    // Github (5)
+    // YouTube Music (5)
     Rectangle {
         Layout.preferredWidth: 20
         Layout.preferredHeight: 20
         color: (root.isSelecting && root.selectedIndex === 5) ? Colors.colFg : "transparent"
-        radius: 4
 
         Text {
             anchors.centerIn: parent
-            text: "\udb80\udea4"
+            text: "\udb80\udf86"
             font.family: "JetBrainsMono Nerd Font"
             font.pixelSize: 20
             color: (root.isSelecting && root.selectedIndex === 5) ? Colors.colBg : Colors.colFg
@@ -190,7 +184,7 @@ RowLayout {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: { root.selectedIndex = 5; githubProcess.running = true; root.isSelecting = false; }
+            onClicked: { root.selectedIndex = 5; ytMusicProcess.running = true; root.isSelecting = false; }
         }
     }
 }

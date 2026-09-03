@@ -1,11 +1,14 @@
 require("modules.autostart")
 require("modules.keybinds")
 require("modules.monitor")
+require("modules.layout")
+require("modules.decoration")
+require("modules.look_and_feel")
 require("modules.animations")
 require("modules.windowrules")
 require("modules.layerrules")
 require("performance_mode")
-
+require("modules.plugins")
 -- to change border color with wallust
 require("hyprland-border")
 
