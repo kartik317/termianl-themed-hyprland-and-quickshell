@@ -53,23 +53,22 @@ PanelWindow {
         border.color: Colors.colCyan
         border.width: 1
 
-        focus: true
-        Keys.onPressed: function (event) {
-            if (event.key === Qt.Key_Right) {
-                WallpaperState.selectedIndex = Math.min(WallpaperState.selectedIndex + 1, WallpaperState.wallpapers.length - 1);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Left) {
-                WallpaperState.selectedIndex = Math.max(WallpaperState.selectedIndex - 1, 0);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                WallpaperState.selectAndApply();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Escape) {
-                WallpaperState.hide();
-                event.accepted = true;
-            }
-        }
-
+	focus: true
+	Keys.onPressed: function (event) {
+	    if (event.key === Qt.Key_Right) {
+		WallpaperState.selectedIndex = (WallpaperState.selectedIndex + 1) % WallpaperState.wallpapers.length;
+		event.accepted = true;
+	    } else if (event.key === Qt.Key_Left) {
+		WallpaperState.selectedIndex = (WallpaperState.selectedIndex - 1 + WallpaperState.wallpapers.length) % WallpaperState.wallpapers.length;
+		event.accepted = true;
+	    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+		WallpaperState.selectAndApply();
+		event.accepted = true;
+	    } else if (event.key === Qt.Key_Escape) {
+		WallpaperState.hide();
+		event.accepted = true;
+	    }
+	}
         Component.onCompleted: forceActiveFocus()
         onVisibleChanged: if (visible)
             forceActiveFocus()
@@ -210,15 +209,15 @@ PanelWindow {
         MouseArea {
             id: wheelOverlay
             anchors.fill: parent
-            acceptedButtons: Qt.NoButton
-            onWheel: function (wheel) {
-                if (wheel.angleDelta.y < 0) {
-                    WallpaperState.selectedIndex = Math.min(WallpaperState.selectedIndex + 1, WallpaperState.wallpapers.length - 1);
-                } else if (wheel.angleDelta.y > 0) {
-                    WallpaperState.selectedIndex = Math.max(WallpaperState.selectedIndex - 1, 0);
-                }
-                wheel.accepted = true;
-            }
+	    acceptedButtons: Qt.NoButton
+	    onWheel: function (wheel) {
+		if (wheel.angleDelta.y < 0) {
+		    WallpaperState.selectedIndex = (WallpaperState.selectedIndex + 1) % WallpaperState.wallpapers.length;
+		} else if (wheel.angleDelta.y > 0) {
+		    WallpaperState.selectedIndex = (WallpaperState.selectedIndex - 1 + WallpaperState.wallpapers.length) % WallpaperState.wallpapers.length;
+		}
+		wheel.accepted = true;
+	    }
         }
     }
 }

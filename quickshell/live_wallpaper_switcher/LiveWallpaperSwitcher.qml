@@ -54,21 +54,21 @@ PanelWindow {
         border.width: 1
 
         focus: true
-        Keys.onPressed: function (event) {
-            if (event.key === Qt.Key_Right) {
-                LiveWallpaperState.selectedIndex = Math.min(LiveWallpaperState.selectedIndex + 1, LiveWallpaperState.wallpapers.length - 1);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Left) {
-                LiveWallpaperState.selectedIndex = Math.max(LiveWallpaperState.selectedIndex - 1, 0);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                LiveWallpaperState.selectAndApply();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Escape) {
-                LiveWallpaperState.hide();
-                event.accepted = true;
-            }
-        }
+	Keys.onPressed: function (event) {
+	    if (event.key === Qt.Key_Right) {
+		LiveWallpaperState.selectedIndex = (LiveWallpaperState.selectedIndex + 1) % LiveWallpaperState.wallpapers.length;
+		event.accepted = true;
+	    } else if (event.key === Qt.Key_Left) {
+		LiveWallpaperState.selectedIndex = (LiveWallpaperState.selectedIndex - 1 + LiveWallpaperState.wallpapers.length) % LiveWallpaperState.wallpapers.length;
+		event.accepted = true;
+	    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+		LiveWallpaperState.selectAndApply();
+		event.accepted = true;
+	    } else if (event.key === Qt.Key_Escape) {
+		LiveWallpaperState.hide();
+		event.accepted = true;
+	    }
+	}
 
         Component.onCompleted: forceActiveFocus()
         onVisibleChanged: if (visible) forceActiveFocus()
@@ -260,14 +260,14 @@ PanelWindow {
             id: wheelOverlay
             anchors.fill: parent
             acceptedButtons: Qt.NoButton
-            onWheel: function (wheel) {
-                if (wheel.angleDelta.y < 0) {
-                    LiveWallpaperState.selectedIndex = Math.min(LiveWallpaperState.selectedIndex + 1, LiveWallpaperState.wallpapers.length - 1);
-                } else if (wheel.angleDelta.y > 0) {
-                    LiveWallpaperState.selectedIndex = Math.max(LiveWallpaperState.selectedIndex - 1, 0);
-                }
-                wheel.accepted = true;
-            }
+	    onWheel: function (wheel) {
+		if (wheel.angleDelta.y < 0) {
+		    LiveWallpaperState.selectedIndex = (LiveWallpaperState.selectedIndex + 1) % LiveWallpaperState.wallpapers.length;
+		} else if (wheel.angleDelta.y > 0) {
+		    LiveWallpaperState.selectedIndex = (LiveWallpaperState.selectedIndex - 1 + LiveWallpaperState.wallpapers.length) % LiveWallpaperState.wallpapers.length;
+		}
+		wheel.accepted = true;
+	    }
         }
     }
 }

@@ -94,7 +94,7 @@ PanelWindow {
     // ═══════════════════════════════════════════════════════════════════════
     Rectangle {
         id: osdCard
-        width:  340
+        width:  400
         height: 56
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom:           parent.bottom

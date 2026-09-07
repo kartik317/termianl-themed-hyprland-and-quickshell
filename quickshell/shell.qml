@@ -10,7 +10,7 @@ import "./lock_screen"
 import "./power_menu"
 import "./app_launcher"
 import "./brightness_controls"
-import "./widgets"
+import "./OSD"
 import "./wallpaper_clock"
 import "./voice_assistant"
 
@@ -53,10 +53,18 @@ ShellRoot {
             screen: modelData
         }
     }
-    // ── Volume OSD (auto-shows on PipeWire sink events) ────────────────────
+    // ── Volume OSD ────────────────────
     Variants {
         model: Quickshell.screens
         VolumeOSD {
+            property var modelData
+            screen: modelData
+        }
+    }
+   //  ── Brightness OSD
+    Variants {
+        model: Quickshell.screens
+        BrightnessOSD {
             property var modelData
             screen: modelData
         }
@@ -69,7 +77,7 @@ ShellRoot {
             screen: modelData
         }
     }
-    // ── App launcher (slides up from bottom center) ────────────────────────
+    // ── App launcher ────────────────────────
     Variants {
         model: Quickshell.screens
         AppLauncher {
