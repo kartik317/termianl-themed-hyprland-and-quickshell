@@ -27,7 +27,11 @@ PanelWindow {
     implicitHeight: 100
 
     mask: Region {
-        item: osdCard
+        item: root.osdVisible ? maskCover : null
+    }
+    Item {
+        id: maskCover
+        anchors.fill: parent
     }
 
     color: "transparent"
