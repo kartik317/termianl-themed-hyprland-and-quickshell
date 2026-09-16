@@ -13,6 +13,7 @@ import "./brightness_controls"
 import "./OSD"
 import "./wallpaper_clock"
 import "./voice_assistant"
+import "./clipboard"
 
 ShellRoot {
     // ── Bar ────────────────────────────────────────────────────────────────
@@ -85,6 +86,8 @@ ShellRoot {
             screen: modelData
         }
     }
+
+    Clipboard {}
 
     LockScreen {} 
 
