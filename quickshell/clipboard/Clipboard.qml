@@ -168,71 +168,71 @@ PanelWindow {
                         color: closeArea.containsMouse ? Colors.colBg : "transparent"
 
                         Text {
-                            anchors.centerIn: parent
-                            text: "✕"
-                            font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: 11
-                            font.bold: true
-                            color: closeArea.containsMouse ? Colors.colCyan : Colors.colBg
-                        }
+			    anchors.centerIn: parent
+			    text: "✕"
+			    font.family: "JetBrainsMono Nerd Font"
+			    font.pixelSize: 11
+			    font.bold: true
+			    color: closeArea.containsMouse ? Colors.colCyan : Colors.colBg
+			}
 
-                        MouseArea {
-                            id: closeArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: ClipboardState.close()
-                        }
-                    }
-                }
-            }
+			MouseArea {
+			    id: closeArea
+			    anchors.fill: parent
+			    hoverEnabled: true
+			    cursorShape: Qt.PointingHandCursor
+			    onClicked: ClipboardState.close()
+			}
+		    }
+		}
+	    }
 
-            // ---------------------------------------------- search line
+	    // ---------------------------------------------- search line
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 34
-                color: "transparent"
+	    Rectangle {
+		Layout.fillWidth: true
+		Layout.preferredHeight: 34
+		color: "transparent"
 
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    width: parent.width
-                    height: 1
-                    color: Colors.colCyan
-                    opacity: 0.65
-                }
+		Rectangle {
+		    anchors.bottom: parent.bottom
+		    width: parent.width
+		    height: 1
+		    color: Colors.colCyan
+		    opacity: 0.65
+		}
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    spacing: 6
+		RowLayout {
+		    anchors.fill: parent
+		    anchors.leftMargin: 10
+		    anchors.rightMargin: 10
+		    spacing: 6
 
-                    Text {
-                        text: ">"
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 13
-                        font.bold: true
-                        color: Colors.colCyan
-                    }
+		    Text {
+			text: ">"
+			font.family: "JetBrainsMono Nerd Font"
+			font.pixelSize: 13
+			font.bold: true
+			color: Colors.colCyan
+		    }
 
-                    TextInput {
-                        id: input
-                        Layout.fillWidth: true
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 13
-                        color: Colors.colFg
-                        selectionColor: Colors.colCyan
-                        selectedTextColor: Colors.colBg
-                        clip: true
-                        focus: true
+		    TextInput {
+			id: input
+			Layout.fillWidth: true
+			font.family: "JetBrainsMono Nerd Font"
+			font.pixelSize: 13
+			color: Colors.colFg
+			selectionColor: Colors.colCyan
+			selectedTextColor: Colors.colBg
+			clip: true
+			focus: true
 
-                        text: ClipboardState.search
+			text: ClipboardState.search
 
-                        onTextChanged: {
-                            ClipboardState.search = text;
-                            ClipboardState.selected = 0;
-                        }
+			onTextChanged: {
+			    ClipboardState.search = text;
+			    ClipboardState.selected = 0;
+			}
 
 			Text {
 			    anchors.verticalCenter: parent.verticalCenter
@@ -242,6 +242,7 @@ PanelWindow {
 			    opacity: 0.6
 			    visible: parent.text.length === 0
 			}
+
 			Keys.priority: Keys.BeforeItem
 			Keys.onPressed: function (event) {
 			    if (event.key === Qt.Key_Delete
@@ -252,34 +253,8 @@ PanelWindow {
 			    }
 			}
 		    }
-
-                    Rectangle {
-                        Layout.preferredWidth: 8
-                        Layout.preferredHeight: 16
-                        color: Colors.colCyan
-                        visible: input.activeFocus
-
-                        SequentialAnimation on opacity {
-                            loops: Animation.Infinite
-                            running: input.activeFocus
-                            PropertyAnimation {
-                                to: 0
-                                duration: 0
-                            }
-                            PauseAnimation {
-                                duration: 500
-                            }
-                            PropertyAnimation {
-                                to: 1
-                                duration: 0
-                            }
-                            PauseAnimation {
-                                duration: 500
-                            }
-                        }
-                    }
-                }
-            }
+		}
+	    }
 
             // --------------------------------------------------- list
 
