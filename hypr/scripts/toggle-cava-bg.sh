@@ -1,12 +1,13 @@
 #!/bin/bash
 
+CAVA_BG="$HOME/.local/bin/cava-bg"
+
 if pgrep -x "cava-bg" > /dev/null 2>&1; then
-    pkill -x "cava-bg"
+    "$CAVA_BG" off
     echo "Cava bg stopped"
 else
-    cava-bg > /dev/null 2>&1 &
-    # Give it a moment to start
-    sleep 0.2
+    setsid "$CAVA_BG" on > /dev/null 2>&1 < /dev/null &
+    sleep 0.5
     if pgrep -x "cava-bg" > /dev/null 2>&1; then
         echo "cava bg started"
     else

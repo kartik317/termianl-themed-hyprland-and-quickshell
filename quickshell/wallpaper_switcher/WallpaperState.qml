@@ -53,8 +53,7 @@ Singleton {
         const script = `
 pkill -x mpvpaper 2>/dev/null
 awww img "${path}" \\
-    --transition-type wipe \\
-    --transition-angle 45 \\
+    --transition-type fade \\
     --transition-duration 2.5 \\
     --transition-fps 60 \\
     --transition-bezier 0.65,0.05,0.36,1

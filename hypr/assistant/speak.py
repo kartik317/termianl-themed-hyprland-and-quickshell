@@ -9,24 +9,14 @@ import threading
 task = Path("~/.config/hypr/assistant/task.txt").expanduser().read_text()
 error_logs = Path("~/.config/hypr/assistant/error.log").expanduser().read_text()
 
-PIPER_MODEL = Path("~/piper-models/en_US-amy-medium.onnx").expanduser()
+PIPER_MODEL = Path("~/piper-models/en_US-lessac-medium.onnx").expanduser()
 
 
-def get_system_prompt():
-    action_path = Path("~/.config/hypr/assistant/action.json").expanduser().read_text()
-    action = json.loads(action_path)
-    if action.get("action") == "talk":
-        talk_prompt = (
-            Path("~/.config/hypr/assistant/prompts/talk_prompt.txt")
-            .expanduser()
-            .read_text()
-        )
-        return f"{talk_prompt}\n\nHere is what user says: {task}"
-    else:
-        return f"""You are Nova, a playful Linux assistant.
+def get_system_prompt(): 
+    return f"""You are a Linux assistant.
 if you see an ERROR in here, the task has failed. Briefly explain why from the error logs max two sentences.
 {error_logs}
-if there is no ERROR, the task has succeeded. Confirm the task is done, sound happy and confident.
+if there is no ERROR, the task has succeeded. Confirm the task is done.
 Here is the task: '{task}'
 if there is no task, say "No task provided".
 Do not mention JSON. Do not repeat yourself"""

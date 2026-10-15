@@ -1,3 +1,4 @@
 {
-    "action": "talk"
+    "action": "find_app",
+    "app": "listening"
 }

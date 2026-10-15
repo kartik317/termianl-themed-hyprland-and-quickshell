@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Effects
+import "../theme"
 
 WlSessionLock {
     id: lock
@@ -11,9 +12,9 @@ WlSessionLock {
     // ── customize these ────────────────────────────────────────
     readonly property string promptUser: "thelinuxguy"
     readonly property string timezoneLabel: "IST"
-    readonly property color termGreen: "#50FA7B"
+    readonly property color termGreen: Colors.colCyan
     readonly property color termDim: Qt.rgba(1, 1, 1, 0.55)
-    readonly property color termFg: "#F8F8F2"
+    readonly property color termFg: Colors.colFg
     readonly property string termFont: "JetBrainsMono Nerd Font"
     // ────────────────────────────────────────────────────────────
 
@@ -142,7 +143,7 @@ WlSessionLock {
                             font.family: lock.termFont
                             font.pixelSize: 16
                             font.bold: true
-                            color: "#8BE9FD"
+                            color: Colors.colCyan
                         }
                         Text {
                             text: lock.promptUser

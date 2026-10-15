@@ -80,14 +80,13 @@ hl.window_rule({
 
 hl.window_rule({
     name = "brave_opacity",
-    match = { class = "brave-browser" },
+    match = { class = "^(brave-.*|chrome-.*)$" },
     opacity = "0.85 0.8"
 })
 
 hl.window_rule({
-    name = "telegram_float",
+    name = "telegram_opacity",
     match = { class = "org.telegram.desktop" },
-    float = true,
     size = {800, 500},
     opacity = "0.7 0.6"
 })

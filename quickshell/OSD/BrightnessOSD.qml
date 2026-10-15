@@ -28,6 +28,7 @@ PanelWindow {
     mask: Region {
         item: root.osdVisible ? maskCover : null
     }
+    // it's a sick trick right :)
     Item {
         id: maskCover
         anchors.fill: parent
@@ -124,9 +125,7 @@ PanelWindow {
                 spacing: 12
 
                 Text {
-                    text: root.brightness > 60 ? "\uf5fe"
-                        : root.brightness > 20 ? "\uf042"
-                        :                         "\uf5dd"
+                    text: "\udb80\udcdc" 
                     font.pixelSize: 16
                     font.family:    "JetBrainsMono Nerd Font"
                     color: Colors.colBlue

@@ -14,6 +14,7 @@ import "./OSD"
 import "./wallpaper_clock"
 import "./voice_assistant"
 import "./clipboard"
+import "./system_tray"
 
 ShellRoot {
     // ── Bar ────────────────────────────────────────────────────────────────
@@ -86,6 +87,8 @@ ShellRoot {
             screen: modelData
         }
     }
+
+    TrayPanel {}
 
     Clipboard {}
 

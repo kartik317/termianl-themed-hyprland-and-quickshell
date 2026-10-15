@@ -36,7 +36,7 @@ def speak_info(info: str) -> None:
         [
             "piper-tts",
             "--model",
-            str(Path("~/piper-models/en_US-amy-medium.onnx").expanduser()),
+            str(Path("~/piper-models/en_US-lessac-medium.onnx").expanduser()),
             "--output_file",
             "-",
         ],
@@ -115,7 +115,7 @@ def start_recording() -> None:
 
     Path(PID_FILE).write_text(str(proc.pid))
     # notify("Voice Note ", "Recording… release Super+A to stop")
-    speak_info("I'm listening…")
+    speak_info("Listening…")
 
 
 def stop_recording() -> bool:
@@ -170,7 +170,7 @@ def stop_recording() -> bool:
     if not text:
         # notify("Voice Note", "Nothing detected — try again", urgency="critical")
         speak_info(
-            "Nothing detected — I'm sorry, I didn't catch that. Please try again."
+            "Nothing detected — try again."
         )
         return False  # return false so if there is no text, the action is not taken
 

@@ -37,7 +37,7 @@ Item {
         Rectangle {
             width: 30; height: 26
             radius: 6
-            color: Colors.colBlack
+            color: Qt.alpha(Colors.colCyan, 0.5)
             clip: true
             visible: MediaState.hasPlayer
 

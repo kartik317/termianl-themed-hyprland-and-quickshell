@@ -14,7 +14,7 @@ Singleton {
     // Quickshell's built-in PAM integration
     PamContext {
         id: pam
-        config: "login" // Uses /etc/pam.d/login for authentication
+        config: "quickshell_lockscreen" 
 
         onCompleted: (result) => {
             if (result === PamResult.Success) {

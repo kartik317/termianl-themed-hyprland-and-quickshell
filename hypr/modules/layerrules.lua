@@ -60,3 +60,9 @@ hl.layer_rule({
     blur = true,
     ignore_alpha = 0
 })
+
+hl.layer_rule({
+    match = { namespace = "qs-clipboard" },
+    blur = true,
+    ignore_alpha = 0
+})

@@ -12,8 +12,7 @@ local mainMod = "SUPER" -- Sets "Windows" key as main modifier
 
 -- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
 hl.bind(mainMod .. " + K", hl.dsp.exec_cmd(terminal .. " --hold sh -c 'fastfetch'"))
-local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
--- closeWindowBind:set_enabled(false)
+hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
@@ -24,8 +23,7 @@ hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("qs ipc call wallpaper-switcher toggle"))
 hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("qs ipc call live-wallpaper-switcher toggle"))
 hl.bind(mainMod .. " + Y", hl.dsp.exec_cmd(terminal .. " -e yazi"))
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("cliphist list | wofi -dmenu | cliphist decode | wl-copy"))
-hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("cliphist list | rofi -dmenu | cliphist delete"))
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 hl.bind("PRINT", hl.dsp.exec_cmd("hyprshot -m window"))
 hl.bind("SHIFT + PRINT", hl.dsp.exec_cmd("hyprshot -m region"))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc call lockscreen lock"))
@@ -42,7 +40,9 @@ hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-wayb
 hl.bind(mainMod .. " + ALT + C", hl.dsp.exec_cmd("qs ipc call clock-widget toggle"))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("qs ipc call brightness-controls toggle"))
 hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("qs ipc call powermenu toggle"))
-
+hl.bind("ALT + C", hl.dsp.exec_cmd("hyprpicker"))
+hl.bind("CTRL + SHIFT + W", hl.dsp.exec_cmd("kitty --class weather -e linecast weather"))
+hl.bind("CTRL + SHIFT + M", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-cava-bg.sh"))
 
 -- Music controls
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("qs ipc call media playPause"))
@@ -65,8 +65,6 @@ hl.bind(mainMod .. " + return", hl.dsp.exec_cmd("qs ipc call appshortcuts launch
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("~/.config/hypr/assistant/start.sh"))
 -- key-up: stop recording
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("~/.config/hypr/assistant/stop.sh"), { release = true })
-hl.bind("ALT + SHIFT + A", hl.dsp.exec_cmd("~/.config/hypr/assistant/start_talking.sh"))
-hl.bind("ALT + SHIFT + A", hl.dsp.exec_cmd("~/.config/hypr/assistant/stop_talking.sh"), { release = true })
 
 
 -- Move focus with mainMod + arrow keys
