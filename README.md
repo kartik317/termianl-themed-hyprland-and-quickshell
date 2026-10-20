@@ -4,10 +4,11 @@ A custom Hyprland and Quickshell setup for a polished Linux desktop experience. 
 
 - `hypr/`: Hyprland config files, automation scripts, and helper modules
 - `quickshell/`: Quickshell shell UI components and widgets
+- `system_config/`: Configuration for terminal tools, Neovim, scripts, and Wallust
 
 ## Overview
 
-This repository is organized into two primary sections:
+This repository is organized into three primary sections:
 
 1. `hypr/`
    - Core Hyprland configuration files
@@ -19,6 +20,11 @@ This repository is organized into two primary sections:
    - QML files for the main shell UI
    - Custom status bar widgets and controls
    - Lock screen, power menu, wallpaper controls, and voice assistant panels
+
+3. `system_config/`
+   - Configurations for Fastfetch, ncmpcpp, and Neovim
+   - System helper scripts
+   - Wallust configuration and templates for wallpaper-based theming
 
 ## hypr/
 
@@ -103,6 +109,8 @@ Quickshell is the UI layer for the desktop.
 - `quickshell/live_wallpaper_switcher/` - Live wallpaper selector
 - `quickshell/wallpaper_switcher/` - Wallpaper switching UI
 - `quickshell/wallpaper_clock/` - Draggable clock overlay
+- `quickshell/system_tray/` - System tray
+- `quickshell/clipboard/` - Clipboard
 - `quickshell/widgets/` - Shared widget components
 
 ### Voice assistant UI
@@ -114,11 +122,21 @@ Quickshell is the UI layer for the desktop.
 
 ### Theme
 
-- `quickshell/theme/Colors.qml` - Theme colors for Quickshell
+- `quickshell/theme/Colors.qml` - Theme colors for Quickshell, automatically updated when the wallpaper changes using Wallust. Configuration is in `system_config/wallust/`.
+
+## system_config/
+
+Configuration files and scripts for the surrounding desktop environment.
+
+- `fastfetch/` - Fastfetch configuration and ASCII art assets
+- `ncmpcpp/` - ncmpcpp configuration
+- `nvim/` - Neovim configuration, Lua modules, and plugin lockfile
+- `scripts/` - System helper scripts, including workspace navigation scripts
+- `wallust/` - Wallust settings and templates used to generate theme colors from the wallpaper
 
 ## Usage
 
-1. Copy the `hypr/` and `quickshell/` folders into your Hyprland configuration directory.
+1. Copy the `hypr/` and `quickshell/` folders into your configuration directory(`~/.config`). copy all the wallpapeprs into `Pictures/wallpaper/`. copy the relevant `system_config/` contents to the locations expected by each application.
 2. Ensure Hyprland is installed and the required QML runtime is available.
 3. Update paths in the configuration files if needed.
 4. Start Hyprland and launch Quickshell with the provided `shell.qml`.
@@ -128,3 +146,4 @@ Quickshell is the UI layer for the desktop.
 - This setup combines Hyprland window management with Quickshell shell UI.
 - The `assistant/` folder contains AI/voice automation tools for hands-free control.
 - The scripts under `hypr/scripts` are utilities for wallpaper, visualization, and shell toggling.
+- This config does not include live wallpapers becuase of their file size
