@@ -1,5 +1,7 @@
 # Terminal Desktop Configuration
 
+[![Desktop image](img.png)](https://youtu.be/Kso0QgYjI9Q)
+
 A custom Hyprland and Quickshell setup for a polished Linux desktop experience. This configuration includes:
 
 - `hypr/`: Hyprland config files, automation scripts, and helper modules
