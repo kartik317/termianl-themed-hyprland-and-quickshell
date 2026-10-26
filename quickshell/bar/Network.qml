@@ -19,6 +19,16 @@ RowLayout {
 
     readonly property real signal: active ? active.signalStrength : 0
 
+    readonly property int maxNameLength: 12
+
+    readonly property string displayName: {
+        if (!active) return ""
+        let name = active.name
+        return name.length > maxNameLength
+            ? name.substring(0, maxNameLength) + "..."
+            : name
+    }
+
     readonly property string icon: {
         if (!Networking.wifiEnabled) return String.fromCodePoint(0xF05AA)
         if (!active) return String.fromCodePoint(0xF092D)
@@ -45,7 +55,7 @@ RowLayout {
         text: {
             if (!Networking.wifiEnabled) return "Off "
             if (!root.active) return "Disconnected "
-            return root.active.name + "  "
+            return root.displayName + "  "
         }
         color: Networking.wifiEnabled ? Colors.colFg : Colors.colBg
 
