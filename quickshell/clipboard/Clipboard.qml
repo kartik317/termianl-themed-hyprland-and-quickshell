@@ -46,24 +46,25 @@ PanelWindow {
     // ------------------------------------------------------------- frame
 
     Rectangle {
-        id: frame
+	id: frame
 
-        anchors.centerIn: parent
-        width: 680
-        height: 520
-        radius: 0
-        color: Colors.colBg
-        border.width: 1
-        border.color: Colors.colCyan
-        opacity: 0.65
-        scale: ClipboardState.open ? 1.0 : 0.98
+	width: 680
+	height: 520
+	x: Math.round((root.width - width) / 2)
+	y: Math.round((root.height - height) / 2)
+	radius: 0
+	color: Colors.colBg
+	border.width: 1
+	border.color: Colors.colCyan
+	opacity: 0.65
+	scale: ClipboardState.open ? 1.0 : 0.98
 
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 70
-                easing.type: Easing.Linear
-            }
-        }
+	Behavior on opacity {
+	    NumberAnimation {
+		duration: 70
+		easing.type: Easing.Linear
+	    }
+	}
         Behavior on scale {
             NumberAnimation {
                 duration: 70
@@ -103,11 +104,22 @@ PanelWindow {
 
             // ------------------------------------------------- title bar
 
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 30
-                color: Colors.colCyan
-                radius: 0
+	    Rectangle {
+		Layout.fillWidth: true
+		Layout.preferredHeight: 30
+		color: Colors.colCyan
+		radius: 0
+
+		MouseArea {
+		    anchors.fill: parent
+		    cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+		    drag.target: frame
+		    drag.axis: Drag.XAndYAxis
+		    drag.minimumX: 0
+		    drag.maximumX: root.width - frame.width
+		    drag.minimumY: 0
+		    drag.maximumY: root.height - frame.height
+		}
 
                 RowLayout {
                     anchors.fill: parent
