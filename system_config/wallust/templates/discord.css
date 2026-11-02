@@ -1,0 +1,202 @@
+/**
+ * @name system24 (catppuccin mocha)
+ * @description a tui-style discord theme. based on catppuccin mocha theme (https://catppuccin.com).
+ * @author refact0r
+ * @version 2.0.0
+ * @invite nz87hXyvcy
+ * @website https://github.com/refact0r/system24
+ * @source https://github.com/refact0r/system24/blob/master/theme/system24-catppuccin-mocha.theme.css
+ * @authorId 508863359777505290
+ * @authorLink https://www.refact0r.dev
+*/
+
+/* import theme modules */
+@import url('https://refact0r.github.io/system24/build/system24.css');
+
+@font-face {
+  font-family: "Monocraft";
+  src: url('https://github.com/IdreesInc/Monocraft/releases/download/v4.2.1/Monocraft-nerd-fonts-patched.ttc') format('truetype');
+}
+
+body {
+    /* ... rest of your options ... */
+    --round-users-profiles: on;
+}
+
+@property --round-users-profiles {
+    syntax: 'off | on';
+    inherits: false;
+    initial-value: off;
+}
+
+@container body style(--round-users-profiles: on) {
+    .avatar_c19a55, .avatar__44b0c {
+        border-radius: 100% !important;
+    }
+
+    .wrapper__44b0c {
+        /* fix something weird with a background color behind the user profile that looked ugly */
+        background-color: transparent !important;
+    }
+
+    .avatarDecorationContainer__44b0c foreignObject {
+        /* fix for a weird mask on the user profile page for user decoration */
+        mask: none;
+    }
+}
+
+body {
+    /* font, change to '' for default discord font */
+    --font: 'Monocraft'; /* change to '' for default discord font */
+    --code-font: 'Monocraft'; /* change to '' for default discord font */
+    font-weight: 800; /* text font weight. 300 is light, 400 is normal. DOES NOT AFFECT BOLD TEXT */
+    letter-spacing: -0.05ch; /* decreases letter spacing for better readability. recommended on monospace fonts.*/
+
+    /* sizes */
+    --gap: 12px; /* spacing between panels */
+    --divider-thickness: 4px; /* thickness of unread messages divider and highlighted message borders */
+    --border-thickness: 2px; /* thickness of borders around main panels. DOES NOT AFFECT OTHER BORDERS */
+    --border-hover-transition: 0.2s ease; /* transition for borders when hovered */
+
+    /* animation/transition options */
+    --animations: on; /* off: disable animations/transitions, on: enable animations/transitions */
+    --list-item-transition: 0.2s ease; /* transition for list items */
+    --dms-icon-svg-transition: 0.4s ease; /* transition for the dms icon */
+
+    /* top bar options */
+    --top-bar-height: var(--gap); /* height of the top bar (discord default is 36px, old discord style is 24px, var(--gap) recommended if button position is set to titlebar) */
+    --top-bar-button-position: titlebar; /* off: default position, hide: hide buttons completely, serverlist: move inbox button to server list, titlebar: move inbox button to channel titlebar (will hide title) */
+    --top-bar-title-position: off; /* off: default centered position, hide: hide title completely, left: left align title (like old discord) */
+    --subtle-top-bar-title: off; /* off: default, on: hide the icon and use subtle text color (like old discord) */
+
+    /* window controls */
+    --custom-window-controls: off; /* off: default window controls, on: custom window controls */
+    --window-control-size: 14px; /* size of custom window controls */
+
+    /* dms button options */
+    --custom-dms-icon: hide; /* off: use default discord icon, hide: remove icon entirely, custom: use custom icon */
+    --dms-icon-svg-url: url(''); /* icon svg url. MUST BE A SVG. */
+    --dms-icon-svg-size: 90%; /* size of the svg (css mask-size property) */
+    --dms-icon-color-before: var(--icon-subtle); /* normal icon color */
+    --dms-icon-color-after: var(--white); /* icon color when button is hovered/selected */
+    --custom-dms-background: image; /* off to disable, image to use a background image (must set url variable below), color to use a custom color/gradient */
+    --dms-background-image-url: url('https://raw.githubusercontent.com/catppuccin/catppuccin/refs/heads/main/assets/logos/exports/macchiato_square.png'); /* url of the background image */
+    --dms-background-image-size: cover; /* size of the background image (css background-size property) */
+    --dms-background-color: linear-gradient(70deg, var(--blue-2), var(--purple-2), var(--red-2)); /* fixed color/gradient (css background property) */
+
+    /* background image options */
+    --background-image: off; /* off: no background image, on: enable background image (must set url variable below) */
+    --background-image-url: url(''); /* url of the background image */
+
+    /* transparency/blur options */
+    /* NOTE: TO USE TRANSPARENCY/BLUR, YOU MUST HAVE TRANSPARENT BG COLORS. FOR EXAMPLE: --bg-4: hsla(220, 15%, 10%, 0.7); */
+    --transparency-tweaks: on; /* off: no changes, on: remove some elements for better transparency */
+    --remove-bg-layer: off; /* off: no changes, on: remove the base --bg-3 layer for use with window transparency (WILL OVERRIDE BACKGROUND IMAGE) */
+    --panel-blur: on; /* off: no changes, on: blur the background of panels */
+    --blur-amount: 12px; /* amount of blur */
+    /* --bg-floating: var(--bg-3); /* set this to a more opaque color if floating panels look too transparent. only applies if panel blur is on  */
+
+    /* other options */
+    --small-user-panel: on; /* off: default user panel, on: smaller user panel like in old discord */
+
+    /* unrounding options */
+    --unrounding: on; /* off: default, on: remove rounded corners from panels */
+
+    /* styling options */
+    --custom-spotify-bar: on; /* off: default, on: custom text-like spotify progress bar */
+    --ascii-titles: on; /* off: default, on: use ascii font for titles at the start of a channel */
+    --ascii-loader: cats; /* off: default, system24: use system24 ascii loader, cats: use cats loader */
+
+    /* panel labels */
+    --panel-labels: on; /* off: default, on: add labels to panels */
+    --label-color: var(--text-muted); /* color of labels */
+    --label-font-weight: 500; /* font weight of labels */
+}
+
+/* color options */
+:root {
+    --colors: on;
+
+    /* wallust palette */
+    --w-bg: {{background}};
+    --w-fg: {{foreground}};
+    --w-red: {{color1}};
+    --w-green: {{color2}};
+    --w-yellow: {{color3}};
+    --w-blue: {{color4}};
+    --w-purple: {{color5}};
+
+    /* text colors */
+    --text-0: var(--bg-3);
+    --text-1: color-mix(in srgb, var(--w-fg), white 15%);
+    --text-2: var(--w-fg);
+    --text-3: color-mix(in srgb, var(--w-fg), var(--w-bg) 20%);
+    --text-4: color-mix(in srgb, var(--w-fg), var(--w-bg) 50%);
+    --text-5: color-mix(in srgb, var(--w-fg), var(--w-bg) 70%);
+
+    /* background and dark colors */
+    --bg-1: color-mix(in srgb, var(--w-bg), var(--w-fg) 18%);
+    --bg-2: color-mix(in srgb, var(--w-bg), var(--w-fg) 9%);
+    --bg-3: color-mix(in srgb, var(--w-bg), black 25%);
+    --bg-4: var(--w-bg);
+    --hover: color-mix(in srgb, var(--w-fg) 10%, transparent);
+    --active: color-mix(in srgb, var(--w-fg) 20%, transparent);
+    --active-2: color-mix(in srgb, var(--w-fg) 30%, transparent);
+    --message-hover: hsla(0, 0%, 0%, 0.1);
+
+    /* accent colors */
+    --accent-1: var(--purple-1);
+    --accent-2: var(--purple-2);
+    --accent-3: var(--purple-3);
+    --accent-4: var(--purple-4);
+    --accent-5: var(--purple-5);
+    --accent-new: var(--accent-2);
+    --mention: linear-gradient(to right, color-mix(in hsl, var(--accent-2), transparent 90%) 40%, transparent);
+    --mention-hover: linear-gradient(to right, color-mix(in hsl, var(--accent-2), transparent 95%) 40%, transparent);
+    --reply: linear-gradient(to right, color-mix(in hsl, var(--text-3), transparent 90%) 40%, transparent);
+    --reply-hover: linear-gradient(to right, color-mix(in hsl, var(--text-3), transparent 95%) 40%, transparent);
+
+    /* status indicator colors */
+    --online: var(--green-2);
+    --dnd: var(--red-2);
+    --idle: var(--yellow-2);
+    --streaming: var(--purple-2);
+    --offline: var(--text-4);
+
+    /* border colors */
+    --border-light: var(--hover);
+    --border: var(--active);
+    --border-hover: var(--accent-2);
+    --button-border: hsl(0, 0%, 100%, 0.1);
+
+    /* base colors: shade 1 lighter, 2-3 base, 4-5 darker */
+    --red-1: color-mix(in srgb, var(--w-red), white 12%);
+    --red-2: var(--w-red);
+    --red-3: var(--w-red);
+    --red-4: color-mix(in srgb, var(--w-red), black 8%);
+    --red-5: color-mix(in srgb, var(--w-red), black 16%);
+
+    --green-1: color-mix(in srgb, var(--w-green), white 12%);
+    --green-2: var(--w-green);
+    --green-3: var(--w-green);
+    --green-4: color-mix(in srgb, var(--w-green), black 8%);
+    --green-5: color-mix(in srgb, var(--w-green), black 16%);
+
+    --blue-1: color-mix(in srgb, var(--w-blue), white 12%);
+    --blue-2: var(--w-blue);
+    --blue-3: var(--w-blue);
+    --blue-4: color-mix(in srgb, var(--w-blue), black 8%);
+    --blue-5: color-mix(in srgb, var(--w-blue), black 16%);
+
+    --yellow-1: color-mix(in srgb, var(--w-yellow), white 12%);
+    --yellow-2: var(--w-yellow);
+    --yellow-3: var(--w-yellow);
+    --yellow-4: color-mix(in srgb, var(--w-yellow), black 8%);
+    --yellow-5: color-mix(in srgb, var(--w-yellow), black 16%);
+
+    --purple-1: color-mix(in srgb, var(--w-purple), white 12%);
+    --purple-2: var(--w-purple);
+    --purple-3: var(--w-purple);
+    --purple-4: color-mix(in srgb, var(--w-purple), black 8%);
+    --purple-5: color-mix(in srgb, var(--w-purple), black 16%);
+}
