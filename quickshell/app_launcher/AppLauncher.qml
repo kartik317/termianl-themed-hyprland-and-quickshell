@@ -240,17 +240,7 @@ PanelWindow {
                     model: root.filteredApps
                     clip: true
                     interactive: false
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onWheel: function (wheel) {
-                            if (wheel.angleDelta.y < 0)
-                                root.navigate(1);
-                            else
-                                root.navigate(-1);
-                        }
-                    }
-
+ 
                     Text {
                         anchors.centerIn: parent
                         visible: root.filteredApps.length === 0
@@ -339,20 +329,7 @@ PanelWindow {
                                     opacity: appRow.sel ? 0.8 : 0.5
                                     elide: Text.ElideRight
                                 }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: root.selectedIndex = index
-                                onClicked: root.launchEntry(modelData)
-                                onWheel: function (wheel) {
-                                    if (wheel.angleDelta.y < 0)
-                                        root.navigate(1);
-                                    else
-                                        root.navigate(-1);
-                                }
-                            }
+                            } 
                         }
                     }
                 }
