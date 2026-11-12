@@ -15,6 +15,7 @@ import "./wallpaper_clock"
 import "./voice_assistant"
 import "./clipboard"
 import "./system_tray"
+import "./notifications"
 
 ShellRoot {
     // ── Bar ────────────────────────────────────────────────────────────────
@@ -99,5 +100,7 @@ ShellRoot {
     WallpaperSwitcher {}
 
     LiveWallpaperSwitcher {}
+
+    NotifCenter {}
 }
 

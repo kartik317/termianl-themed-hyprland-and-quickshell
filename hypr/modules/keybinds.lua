@@ -31,18 +31,26 @@ hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc call lockscreen lock"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("brave"))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd("obsidian"))
 hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("kitty -e bluetui"))
-hl.bind(mainMod .. " + SHIFT + C", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-cava-bg.sh"))
 hl.bind("CTRL + M", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-glava.sh"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("kitty -e nmtui"))
 hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-quickshell.sh"))
-hl.bind(mainMod .. " + Tab", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-waybar.sh"))
 hl.bind(mainMod .. " + ALT + C", hl.dsp.exec_cmd("qs ipc call clock-widget toggle"))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("qs ipc call brightness-controls toggle"))
 hl.bind(mainMod .. " + Escape", hl.dsp.exec_cmd("qs ipc call powermenu toggle"))
 hl.bind("ALT + C", hl.dsp.exec_cmd("hyprpicker"))
 hl.bind("CTRL + SHIFT + W", hl.dsp.exec_cmd("kitty --class weather -e linecast weather"))
 hl.bind("CTRL + SHIFT + M", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-cava-bg.sh"))
+hl.bind(mainMod .. " + T", hl.dsp.exec_cmd("qs ipc call tray toggle"))
+
+-- notifications
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("qs ipc call notifs toggle"))
+hl.bind(mainMod .. " + X", hl.dsp.exec_cmd("qs ipc call notifs dismissToast"))
+hl.bind(mainMod .. " + SHIFT + X", hl.dsp.exec_cmd("qs ipc call notifs dismissAllToasts"))
+
+-- For Monocle layout
+hl.bind(mainMod .. " + Tab", hl.dsp.layout("cyclenext"))
+hl.bind(mainMod .. " + SHIFT + Tab", hl.dsp.layout("cycleprev"))
 
 -- Music controls
 hl.bind(mainMod .. " + SHIFT + P", hl.dsp.exec_cmd("qs ipc call media playPause"))

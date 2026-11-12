@@ -66,3 +66,24 @@ hl.layer_rule({
     blur = true,
     ignore_alpha = 0
 })
+
+
+hl.layer_rule({
+    match = { namespace = "qs-tray" },
+    blur = true,
+    ignore_alpha = 0
+})
+
+
+hl.layer_rule({
+    match = { namespace = "notificationcenter" },
+    blur = true,
+    ignore_alpha = 0
+})
+
+
+hl.layer_rule({
+    match = { namespace = "notificationtoast" },
+    blur = true,
+    ignore_alpha = 0
+})
