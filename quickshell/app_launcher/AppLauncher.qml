@@ -2,6 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
+import QtMultimedia
 import "../theme"
 
 PanelWindow {
@@ -40,6 +41,34 @@ PanelWindow {
     property string searchQuery: ""
     property int selectedIndex: 0
     readonly property bool isSearching: searchQuery.trim() !== ""
+
+    // ── Animation state ────────────────────────────────────────────────────
+    // reallyVisible stays true until the close animation finishes
+    property bool reallyVisible: false
+    property real openW: 0       // 0..1 horizontal expand
+    property real openH: 0       // 0..1 vertical expand
+    property real flick: 1       // panel opacity (glitch flicker)
+    property real revealRows: 999 // rows with index < revealRows are shown (hard step, no fade)
+
+    // ── Sound effects ──────────────────────────────────────────────────────
+    readonly property string sfxDir: "file://" + Quickshell.env("HOME") + "/.config/quickshell/sounds/"
+
+    SoundEffect {
+        id: openSfx
+        source: root.sfxDir + "open.wav"
+    }
+    SoundEffect {
+        id: closeSfx
+        source: root.sfxDir + "close.wav"
+    }
+    SoundEffect {
+        id: typeSfx
+        source: root.sfxDir + "type.wav"
+    }
+    SoundEffect {
+        id: navSfx
+        source: root.sfxDir + "nav.wav"
+    }
 
     property var filteredApps: {
         var q = searchQuery.trim().toLowerCase();
@@ -89,16 +118,143 @@ PanelWindow {
             return;
         selectedIndex = (selectedIndex + delta + filteredApps.length) % filteredApps.length;
         listView.positionViewAtIndex(selectedIndex, ListView.Contain);
+        navSfx.play();
     }
 
     Connections {
         target: AppLauncherState
         function onLauncherVisibleChanged() {
             if (AppLauncherState.launcherVisible) {
+                closeSfx.stop();
+                openSfx.play();
+
+                closeAnim.stop();
+                root.reallyVisible = true;
+                openAnim.restart();
+
                 searchInput.text = "";
                 root.searchQuery = "";
                 root.selectedIndex = 0;
                 searchInput.forceActiveFocus();
+            } else {
+                openSfx.stop();
+                closeSfx.play();
+
+                openAnim.stop();
+                closeAnim.restart();
+            }
+        }
+    }
+
+    // ── Open animation: CRT line → expand → glitch flicker + line-by-line rows
+    SequentialAnimation {
+        id: openAnim
+
+        ScriptAction {
+            script: {
+                root.openW = 0;
+                root.openH = 0;
+                root.flick = 1;
+                root.revealRows = 0;
+            }
+        }
+
+        // 1) 2px cyan line stretches out horizontally
+        NumberAnimation {
+            target: root
+            property: "openW"
+            to: 1
+            duration: 70
+            easing.type: Easing.OutCubic
+        }
+
+        ParallelAnimation {
+            // 2) snaps open vertically
+            NumberAnimation {
+                target: root
+                property: "openH"
+                to: 1
+                duration: 90
+                easing.type: Easing.OutQuart
+            }
+
+            // 3) glitch flicker once it's open
+            SequentialAnimation {
+                PauseAnimation {
+                    duration: 90
+                }
+                NumberAnimation {
+                    target: root
+                    property: "flick"
+                    to: 0.4
+                    duration: 25
+                }
+                NumberAnimation {
+                    target: root
+                    property: "flick"
+                    to: 1.0
+                    duration: 25
+                }
+                NumberAnimation {
+                    target: root
+                    property: "flick"
+                    to: 0.7
+                    duration: 25
+                }
+                NumberAnimation {
+                    target: root
+                    property: "flick"
+                    to: 1.0
+                    duration: 25
+                }
+            }
+
+            // 4) rows print one by one, like terminal output
+            SequentialAnimation {
+                PauseAnimation {
+                    duration: 50
+                }
+                NumberAnimation {
+                    target: root
+                    property: "revealRows"
+                    to: root.maxVisible + 1
+                    duration: 120
+                    easing.type: Easing.Linear
+                }
+            }
+        }
+
+        // make sure every row (including scrolled ones) is visible afterwards
+        ScriptAction {
+            script: {
+                root.revealRows = 999;
+                root.flick = 1;
+            }
+        }
+    }
+
+    // ── Close animation: fast reverse, then hide ───────────────────────────
+    SequentialAnimation {
+        id: closeAnim
+
+        NumberAnimation {
+            target: root
+            property: "openH"
+            to: 0
+            duration: 60
+            easing.type: Easing.InQuart
+        }
+        NumberAnimation {
+            target: root
+            property: "openW"
+            to: 0
+            duration: 40
+            easing.type: Easing.InCubic
+        }
+        ScriptAction {
+            script: {
+                root.reallyVisible = false;
+                root.flick = 1;
             }
         }
     }
@@ -122,32 +278,34 @@ PanelWindow {
 
     // ── Panel ──────────────────────────────────────────────────────────────
     Rectangle {
-	id: panelBorder
-	width: root.panelW
-	height: root.panelH
+        id: panelBorder
+        // never smaller than 2px so the cyan "CRT line" is always visible
+        width: Math.max(2, root.panelW * root.openW)
+        height: Math.max(2, root.panelH * root.openH)
+        opacity: root.flick
 
-	anchors {
-	    bottom: parent.bottom
-	    bottomMargin: 0 // distance from screen edge, adjust to taste
-	    horizontalCenter: parent.horizontalCenter
-	}
-	visible: AppLauncherState.launcherVisible
+        anchors {
+            bottom: parent.bottom
+            bottomMargin: 0 // distance from screen edge, adjust to taste
+            horizontalCenter: parent.horizontalCenter
+        }
+        visible: root.reallyVisible
 
-	color: "transparent"
-	border.color: Colors.colCyan
-	border.width: 1
-	radius: 0
+        color: "transparent"
+        border.color: Colors.colCyan
+        border.width: 1
+        radius: 0
 
         Rectangle {
             id: panel
-	    anchors.fill: parent
+            anchors.fill: parent
             anchors.margins: 1
-            
+
             color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.5)
             radius: 0
             clip: true
 
-            // ── Content ────────────────────────────────────────────────────────
+            // ── Content ────────────────────────────────────────────────────
             Column {
                 anchors {
                     top: parent.top
@@ -157,8 +315,8 @@ PanelWindow {
                     right: parent.right
                     rightMargin: 10
                 }
-                
-                // ── Search box (Terminal Prompt Style) ──────────────────────────
+
+                // ── Search box (Terminal Prompt Style) ──────────────────────
                 Rectangle {
                     width: parent.width
                     height: 36
@@ -220,6 +378,9 @@ PanelWindow {
                                     } else if (event.key === Qt.Key_Escape) {
                                         AppLauncherState.hide();
                                         event.accepted = true;
+                                    } else if (event.text.length > 0 || event.key === Qt.Key_Backspace) {
+                                        // typing tick; doesn't set accepted, so the character still gets typed
+                                        typeSfx.play();
                                     }
                                 }
                             }
@@ -232,7 +393,7 @@ PanelWindow {
                     height: 8
                 }
 
-                // ── App list ───────────────────────────────────────────────────
+                // ── App list ───────────────────────────────────────────────
                 ListView {
                     id: listView
                     width: parent.width
@@ -240,7 +401,7 @@ PanelWindow {
                     model: root.filteredApps
                     clip: true
                     interactive: false
- 
+
                     Text {
                         anchors.centerIn: parent
                         visible: root.filteredApps.length === 0
@@ -257,6 +418,9 @@ PanelWindow {
                         id: appRow
                         width: listView.width
                         height: root.itemH
+
+                        // hard step reveal (no fade) to match the instant-swap style
+                        opacity: index < root.revealRows ? 1 : 0
 
                         readonly property bool sel: root.selectedIndex === index
                         readonly property bool isRecent: !root.isSearching && AppLauncherState.recentIds.indexOf(modelData.id) !== -1 && AppLauncherState.recentIds.indexOf(modelData.id) < 5
@@ -329,7 +493,7 @@ PanelWindow {
                                     opacity: appRow.sel ? 0.8 : 0.5
                                     elide: Text.ElideRight
                                 }
-                            } 
+                            }
                         }
                     }
                 }
@@ -337,3 +501,4 @@ PanelWindow {
         }
     }
 }
+
