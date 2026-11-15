@@ -9,13 +9,13 @@ import "./live_wallpaper_switcher"
 import "./lock_screen"
 import "./power_menu"
 import "./app_launcher"
-import "./brightness_controls"
 import "./OSD"
 import "./wallpaper_clock"
 import "./voice_assistant"
 import "./clipboard"
 import "./system_tray"
 import "./notifications"
+import "./setting_menu"
 
 ShellRoot {
     // ── Bar ────────────────────────────────────────────────────────────────
@@ -45,15 +45,6 @@ ShellRoot {
                 id: draggableClock
                 screen: clockWindow.screen
             }
-        }
-    }
-    
-    // ── Brightness Control ───────────────────
-    Variants {
-        model: Quickshell.screens
-        BrightnessControls {
-            property var modelData
-            screen: modelData
         }
     }
     // ── Volume OSD ────────────────────
@@ -89,6 +80,15 @@ ShellRoot {
         }
     }
 
+   // Settings 
+    Variants {
+	model: Quickshell.screens
+	SettingsPanel {
+	    property var modelData
+	    screen: modelData
+	}
+    }
+
     TrayPanel {}
 
     Clipboard {}
@@ -101,6 +101,6 @@ ShellRoot {
 
     LiveWallpaperSwitcher {}
 
-    NotifCenter {}
+    NotificationCenter {}
 }
 

@@ -2,8 +2,8 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
-import QtMultimedia
 import "../theme"
+import "../setting_menu"
 
 PanelWindow {
     id: root
@@ -50,24 +50,22 @@ PanelWindow {
     property real flick: 1       // panel opacity (glitch flicker)
     property real revealRows: 999 // rows with index < revealRows are shown (hard step, no fade)
 
-    // ── Sound effects ──────────────────────────────────────────────────────
-    readonly property string sfxDir: "file://" + Quickshell.env("HOME") + "/.config/quickshell/sounds/"
-
-    SoundEffect {
+    // ── Sound effects (all respect Settings.soundEnabled via Sfx) ──────────
+    Sfx {
         id: openSfx
-        source: root.sfxDir + "open.wav"
+        file: "app_launcher/open.wav"
     }
-    SoundEffect {
+    Sfx {
         id: closeSfx
-        source: root.sfxDir + "close.wav"
+        file: "app_launcher/close.wav"
     }
-    SoundEffect {
+    Sfx {
         id: typeSfx
-        source: root.sfxDir + "type.wav"
+        file: "app_launcher/type.wav"
     }
-    SoundEffect {
+    Sfx {
         id: navSfx
-        source: root.sfxDir + "nav.wav"
+        file: "app_launcher/nav.wav"
     }
 
     property var filteredApps: {
@@ -130,7 +128,15 @@ PanelWindow {
 
                 closeAnim.stop();
                 root.reallyVisible = true;
-                openAnim.restart();
+                if (Settings.animationsEnabled) {
+                    openAnim.restart();
+                } else {
+                    openAnim.stop();
+                    root.openW = 1;
+                    root.openH = 1;
+                    root.flick = 1;
+                    root.revealRows = 999;
+                }
 
                 searchInput.text = "";
                 root.searchQuery = "";
@@ -141,7 +147,13 @@ PanelWindow {
                 closeSfx.play();
 
                 openAnim.stop();
-                closeAnim.restart();
+                if (Settings.animationsEnabled) {
+                    closeAnim.restart();
+                } else {
+                    closeAnim.stop();
+                    root.reallyVisible = false;
+                    root.flick = 1;
+                }
             }
         }
     }
