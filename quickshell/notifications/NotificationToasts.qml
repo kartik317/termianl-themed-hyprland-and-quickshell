@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.Notifications
 import "../theme"
+import "../setting_menu"
 // Small popups for incoming notifications.
 //   left click  -> hide the toast (stays in history)
 //   right click -> dismiss it completely
@@ -37,8 +38,32 @@ Scope {
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
         readonly property string mono: "JetBrainsMono Nerd Font"
-        readonly property color crit: "#ff5555"
-        readonly property color dim: Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.55)
+        readonly property color danger: "#e06c75"
+        readonly property color line: Qt.alpha(Colors.colCyan, 0.35)
+        readonly property color chip: Qt.alpha(Colors.colCyan, 0.15)
+
+        // ── Sound effects (silent automatically when sound is off) ───────────
+        // One sound per change in the number of toasts, so dismissing all
+        // toasts at once plays a single close sound.
+        Sfx {
+            id: popSfx
+            file: "notification/popup.wav"
+        }
+        Sfx {
+            id: popCloseSfx
+            file: "notification/close.wav"
+        }
+
+        property int popupCount: NotificationState.popups.length
+        property int lastPopupCount: 0
+
+        onPopupCountChanged: {
+            if (popupCount > lastPopupCount)
+                popSfx.play()
+            else if (popupCount < lastPopupCount)
+                popCloseSfx.play()
+            lastPopupCount = popupCount
+        }
 
         Column {
             id: stack
@@ -56,20 +81,24 @@ Scope {
                     values: NotificationState.popups
                 }
 
-                delegate: Rectangle {
+                // The root item keeps the full layout size (so the stack and
+                // the window size never jitter); the frame inside it is what
+                // animates, growing from the bottom-right corner.
+                delegate: Item {
                     id: toast
 
                     required property var modelData
 
                     readonly property bool critical: modelData.urgency === NotificationUrgency.Critical
                     readonly property bool low: modelData.urgency === NotificationUrgency.Low
+                    readonly property color accent: critical ? win.danger : Colors.colCyan
+
+                    property real openW: 0
+                    property real openH: 0
+                    property real flick: 1
 
                     width: stack.width
                     height: col.height + 16
-                    radius: 0
-                    color: Qt.alpha(Colors.colBg, 0.65)
-                    border.width: 1
-                    border.color: critical ? win.crit : Colors.colCyan
 
                     Timer {
                         // critical: 10s, otherwise the app's timeout or 5s
@@ -93,71 +122,177 @@ Scope {
                         }
                     }
 
-                    Column {
-                        id: col
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            top: parent.top
-                            margins: 8
+                    // ── Appear: line extends left, grows upward, then flickers ─
+                    Component.onCompleted: {
+                        if (Settings.animationsEnabled) {
+                            appearAnim.start()
+                        } else {
+                            toast.openW = 1
+                            toast.openH = 1
                         }
-                        spacing: 4
+                    }
 
-                        Row {
-                            spacing: 6
+                    SequentialAnimation {
+                        id: appearAnim
 
-                            Rectangle {
-                                width: tagText.implicitWidth + 8
-                                height: 16
-                                radius: 0
-                                color: toast.critical ? win.crit
-                                     : toast.low ? win.dim
-                                     : Colors.colCyan
+                        NumberAnimation {
+                            target: toast
+                            property: "openW"
+                            to: 1
+                            duration: 70
+                            easing.type: Easing.OutCubic
+                        }
+
+                        ParallelAnimation {
+                            NumberAnimation {
+                                target: toast
+                                property: "openH"
+                                to: 1
+                                duration: 90
+                                easing.type: Easing.OutQuart
+                            }
+
+                            SequentialAnimation {
+                                PauseAnimation {
+                                    duration: 90
+                                }
+                                NumberAnimation {
+                                    target: toast
+                                    property: "flick"
+                                    to: 0.4
+                                    duration: 25
+                                }
+                                NumberAnimation {
+                                    target: toast
+                                    property: "flick"
+                                    to: 1.0
+                                    duration: 25
+                                }
+                                NumberAnimation {
+                                    target: toast
+                                    property: "flick"
+                                    to: 0.7
+                                    duration: 25
+                                }
+                                NumberAnimation {
+                                    target: toast
+                                    property: "flick"
+                                    to: 1.0
+                                    duration: 25
+                                }
+                            }
+                        }
+
+                        ScriptAction {
+                            script: toast.flick = 1
+                        }
+                    }
+
+                    Rectangle {
+                        id: frame
+                        anchors {
+                            right: parent.right
+                            bottom: parent.bottom
+                        }
+
+                        // never smaller than 2px so the "CRT line" is always visible
+                        width: Math.max(2, toast.width * toast.openW)
+                        height: Math.max(2, toast.height * toast.openH)
+
+                        // flick only affects the frame as a whole; the background
+                        // alpha is set below so text stays full brightness
+                        opacity: toast.flick
+                        clip: true
+
+                        radius: 0
+                        color: Qt.alpha(Colors.colBg, 0.88)
+                        border.width: 1
+                        border.color: toast.critical ? toast.accent : win.line
+
+                        // solid accent bar down the left edge (cyan, red for critical)
+                        Rectangle {
+                            anchors {
+                                left: parent.left
+                                top: parent.top
+                                bottom: parent.bottom
+                            }
+                            width: 3
+                            color: toast.accent
+                        }
+
+                        // fixed width + anchored bottom-right, so content is
+                        // wiped in as the frame grows instead of reflowing
+                        Column {
+                            id: col
+                            width: toast.width - 24
+                            anchors {
+                                right: parent.right
+                                bottom: parent.bottom
+                                rightMargin: 8
+                                bottomMargin: 8
+                            }
+                            spacing: 4
+
+                            Row {
+                                spacing: 6
+
+                                Rectangle {
+                                    width: tagText.implicitWidth + 10
+                                    height: 16
+                                    color: toast.critical ? win.danger
+                                         : toast.low ? win.chip
+                                         : Colors.colCyan
+
+                                    Text {
+                                        id: tagText
+                                        anchors.centerIn: parent
+                                        text: toast.critical ? "CRIT" : toast.low ? "LOW" : "INFO"
+                                        color: toast.low ? Colors.colBrightBlack : Colors.colBg
+                                        font.family: win.mono
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                    }
+                                }
 
                                 Text {
-                                    id: tagText
-                                    anchors.centerIn: parent
-                                    text: toast.critical ? "CRIT" : toast.low ? "LOW" : "INFO"
-                                    color: Colors.colBg
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: toast.modelData.appName.toLowerCase()
+                                    color: Colors.colFg
                                     font.family: win.mono
-                                    font.pixelSize: 10
-                                    font.bold: true
+                                    font.pixelSize: 11
                                 }
                             }
 
                             Text {
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: toast.modelData.appName.toLowerCase()
+                                width: col.width
+                                visible: text.length > 0
+                                text: toast.modelData.summary
                                 color: Colors.colFg
                                 font.family: win.mono
-                                font.pixelSize: 11
+                                font.pixelSize: 13
+                                font.bold: true
+                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
+                            }
+
+                            Text {
+                                width: col.width
+                                visible: text.length > 0
+                                text: toast.modelData.body
+                                textFormat: Text.PlainText
+                                color: Colors.colBrightBlack
+                                font.family: win.mono
+                                font.pixelSize: 12
+                                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                                maximumLineCount: 2
+                                elide: Text.ElideRight
                             }
                         }
 
-                        Text {
-                            width: col.width
-                            visible: text.length > 0
-                            text: toast.modelData.summary
-                            color: Colors.colFg
-                            font.family: win.mono
-                            font.pixelSize: 13
-                            font.bold: true
-                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                            maximumLineCount: 2
-                            elide: Text.ElideRight
-                        }
-
-                        Text {
-                            width: col.width
-                            visible: text.length > 0
-                            text: toast.modelData.body
-                            textFormat: Text.PlainText
-                            color: win.dim
-                            font.family: win.mono
-                            font.pixelSize: 12
-                            wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                            maximumLineCount: 2
-                            elide: Text.ElideRight
+                        // last child so it draws on top of the content
+                        CornerBrackets {
+                            color: toast.accent
                         }
                     }
                 }
