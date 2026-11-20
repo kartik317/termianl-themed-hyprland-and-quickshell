@@ -1,8 +1,8 @@
 import Quickshell
-import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import QtQuick
+import QtQuick.Layouts
 import "../theme"
 
 PanelWindow {
@@ -11,7 +11,7 @@ PanelWindow {
 
     IpcHandler {
         target: "settings"
-        function toggle() {
+        function toggle(): void {
             Settings.toggle();
         }
     }
@@ -71,11 +71,24 @@ PanelWindow {
     property real openH: 0
     property real flick: 1
 
-    // ── Geometry / palette ─────────────────────────────────────────────────
-    readonly property int panelW: 300
-    readonly property int rowH: 32
-    readonly property color accentFill: Colors.colBlue
-    readonly property color fgDim: Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.6)
+    // ── Geometry / style ───────────────────────────────────────────────────
+    readonly property int panelW: 320
+    readonly property int rowH: 34
+    readonly property int headerH: 28
+    readonly property int titleH: 34
+    readonly property int footerH: 28
+
+    readonly property string fontFamily: "JetBrainsMono Nerd Font"
+    readonly property color dim: Qt.alpha(Colors.colCyan, 0.35)
+
+    // total height of the entries list, so the panel height follows `entries`
+    readonly property real listH: {
+        var h = 0;
+        for (var i = 0; i < entries.length; i++)
+            h += entries[i].type === "header" ? headerH : rowH;
+        return h;
+    }
+    readonly property real fullH: titleH + listH + footerH + 2
 
     // ── Sounds (silent automatically when sound effects are off) ───────────
     Sfx {
@@ -289,13 +302,13 @@ PanelWindow {
     Rectangle {
         id: panelBorder
 
-        // 10px top + 10px bottom padding + 2px border
-        readonly property real fullH: col.implicitHeight + 22
-
         width: Math.max(2, root.panelW * root.openW)
-        height: Math.max(2, fullH * root.openH)
-        opacity: root.flick
+        height: Math.max(2, root.fullH * root.openH)
         visible: root.reallyVisible
+
+        // flick only affects the frame as a whole; the background alpha is
+        // set below so text stays full brightness
+        opacity: root.flick
 
         anchors {
             right: parent.right
@@ -303,142 +316,181 @@ PanelWindow {
             verticalCenter: parent.verticalCenter
         }
 
-        color: "transparent"
-        border.color: Colors.colCyan
+        color: Qt.alpha(Colors.colBg, 0.88)
+        border.color: root.dim
         border.width: 1
         radius: 0
+        clip: true
 
-        Rectangle {
-            id: panel
+        // swallows clicks on empty panel area so they don't close it
+        MouseArea {
             anchors.fill: parent
-            anchors.margins: 1
+        }
 
-            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.5)
-            radius: 0
-            clip: true
-
-            // swallows clicks on empty panel area so they don't close it
-            MouseArea {
-                anchors.fill: parent
+        // fixed size + anchored top-right, so content is wiped in as the
+        // panel widens instead of reflowing
+        ColumnLayout {
+            width: root.panelW - 2
+            height: root.fullH - 2
+            anchors {
+                top: parent.top
+                right: parent.right
+                topMargin: 1
+                rightMargin: 1
             }
+            spacing: 0
 
-            // fixed width + anchored right, so content is wiped in as the
-            // panel widens instead of reflowing
-            Column {
-                id: col
-                width: root.panelW - 22
+            // ── Title bar ──────────────────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.titleH
 
-                anchors {
-                    top: parent.top
-                    topMargin: 10
-                    right: parent.right
-                    rightMargin: 10
-                }
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    spacing: 8
 
-                Text {
-                    height: 24
-                    verticalAlignment: Text.AlignVCenter
-                    text: "> SETTINGS"
-                    color: Colors.colCyan
-                    font {
-                        pixelSize: 13
-                        family: "JetBrainsMono Nerd Font"
-                        weight: Font.Bold
+                    // blocky inverted tag
+                    Rectangle {
+                        implicitWidth: titleTag.implicitWidth + 14
+                        implicitHeight: titleTag.implicitHeight + 4
+                        color: Colors.colCyan
+
+                        Text {
+                            id: titleTag
+                            anchors.centerIn: parent
+                            text: "SETTINGS"
+                            font.family: root.fontFamily
+                            font.pixelSize: 11
+                            font.bold: true
+                            font.letterSpacing: 1
+                            color: Colors.colBg
+                        }
+                    }
+
+                    Text {
+                        text: ("linuxguy") + "@config"
+                        font.family: root.fontFamily
+                        font.pixelSize: 11
+                        color: Colors.colBrightBlack
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
                     }
                 }
 
-                Item {
-                    width: 1
-                    height: 6
+                Rectangle {
+                    anchors.bottom: parent.bottom
+                    width: parent.width
+                    height: 1
+                    color: root.dim
                 }
+            }
+
+            // ── Entries ────────────────────────────────────────────────────
+            Column {
+                id: listCol
+                Layout.fillWidth: true
+                spacing: 0
 
                 Repeater {
                     model: root.entries
 
                     delegate: Item {
                         id: row
-                        width: col.width
-                        height: modelData.type === "header" ? 24 : root.rowH
+                        width: listCol.width
+                        height: modelData.type === "header" ? root.headerH : root.rowH
 
                         readonly property bool isToggle: modelData.type === "toggle"
                         readonly property bool sel: isToggle && root.selectedIndex === index
+                        readonly property bool hovered: rowMouse.containsMouse
                         readonly property bool isOn: isToggle && Settings.get(modelData.key) === true
 
-                        // section header
-                        Text {
+                        // section header:  // AUDIO ─────────
+                        RowLayout {
                             visible: !row.isToggle
-                            anchors {
-                                left: parent.left
-                                leftMargin: 8
-                                verticalCenter: parent.verticalCenter
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            spacing: 8
+
+                            Text {
+                                text: "// " + modelData.label
+                                color: Colors.colBrightBlack
+                                font.pixelSize: 11
+                                font.family: root.fontFamily
                             }
-                            text: "// " + modelData.label
-                            color: Colors.colBlue
-                            font {
-                                pixelSize: 11
-                                family: "JetBrainsMono Nerd Font"
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 1
+                                Layout.alignment: Qt.AlignVCenter
+                                color: Qt.alpha(Colors.colCyan, 0.2)
                             }
                         }
 
-                        // toggle row
+                        // toggle row: selected = solid cyan block, hover = faint block
                         Rectangle {
                             visible: row.isToggle
                             anchors.fill: parent
                             radius: 0
-                            color: row.sel ? root.accentFill : "transparent"
+                            color: row.sel ? Colors.colCyan
+                                 : row.hovered ? Qt.alpha(Colors.colCyan, 0.15)
+                                 : "transparent"
 
-                            Text {
-                                id: promptGlyph
-                                anchors {
-                                    left: parent.left
-                                    leftMargin: 8
-                                    verticalCenter: parent.verticalCenter
-                                }
-                                text: row.sel ? ">" : " "
-                                color: row.sel ? Colors.colBg : Colors.colBlue
-                                font {
-                                    pixelSize: 12
-                                    family: "JetBrainsMono Nerd Font"
-                                    weight: Font.Bold
-                                }
-                            }
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 14
+                                spacing: 8
 
-                            Text {
-                                anchors {
-                                    left: promptGlyph.right
-                                    leftMargin: 8
-                                    verticalCenter: parent.verticalCenter
+                                Text {
+                                    text: row.sel ? ">" : " "
+                                    color: Colors.colBg
+                                    font.pixelSize: 12
+                                    font.family: root.fontFamily
+                                    font.bold: true
                                 }
-                                text: modelData.label
-                                color: row.sel ? Colors.colBg : Colors.colFg
-                                font {
-                                    pixelSize: 12
-                                    family: "JetBrainsMono Nerd Font"
-                                    weight: row.sel ? Font.Bold : Font.Normal
-                                }
-                            }
 
-                            // blocky status tag, instant color swap
-                            Text {
-                                anchors {
-                                    right: parent.right
-                                    rightMargin: 8
-                                    verticalCenter: parent.verticalCenter
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.label
+                                    color: row.sel ? Colors.colBg : Colors.colFg
+                                    font.pixelSize: 12
+                                    font.family: root.fontFamily
+                                    font.bold: row.sel
                                 }
-                                text: row.isOn ? "[ ON]" : "[OFF]"
-                                color: row.sel ? Colors.colBg : (row.isOn ? Colors.colCyan : root.fgDim)
-                                font {
-                                    pixelSize: 12
-                                    family: "JetBrainsMono Nerd Font"
-                                    weight: Font.Bold
+
+                                // blocky status tag, instant color swap
+                                Rectangle {
+                                    Layout.preferredWidth: 38
+                                    Layout.preferredHeight: 18
+                                    color: row.sel ? Colors.colBg
+                                         : row.isOn ? Colors.colCyan
+                                         : Qt.alpha(Colors.colCyan, 0.15)
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: row.isOn ? "ON" : "OFF"
+                                        font.family: root.fontFamily
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                        color: row.sel ? (row.isOn ? Colors.colCyan : Colors.colBrightBlack)
+                                             : row.isOn ? Colors.colBg
+                                             : Colors.colBrightBlack
+                                    }
                                 }
                             }
                         }
 
                         MouseArea {
+                            id: rowMouse
                             anchors.fill: parent
                             enabled: row.isToggle
                             hoverEnabled: true
+                            cursorShape: row.isToggle ? Qt.PointingHandCursor : Qt.ArrowCursor
                             onEntered: root.selectedIndex = index
                             onClicked: {
                                 root.selectedIndex = index;
@@ -447,24 +499,69 @@ PanelWindow {
                         }
                     }
                 }
+            }
 
-                Item {
-                    width: 1
-                    height: 6
+            Item {
+                Layout.fillHeight: true
+            }
+
+            // ── Footer ─────────────────────────────────────────────────────
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.footerH
+
+                Rectangle {
+                    anchors.top: parent.top
+                    width: parent.width
+                    height: 1
+                    color: root.dim
                 }
 
-                Text {
-                    height: 20
-                    verticalAlignment: Text.AlignVCenter
-                    text: "[↑↓] MOVE  [ENTER] TOGGLE  [ESC] CLOSE"
-                    color: root.fgDim
-                    font {
-                        pixelSize: 10
-                        family: "JetBrainsMono Nerd Font"
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    spacing: 12
+
+                    Repeater {
+                        model: [
+                            { k: "↑↓",  d: "move" },
+                            { k: "⏎",   d: "toggle" },
+                            { k: "ESC", d: "close" }
+                        ]
+
+                        Row {
+                            spacing: 5
+
+                            Rectangle {
+                                width: keyText.implicitWidth + 8
+                                height: keyText.implicitHeight + 2
+                                color: Colors.colCyan
+
+                                Text {
+                                    id: keyText
+                                    anchors.centerIn: parent
+                                    text: modelData.k
+                                    font.family: root.fontFamily
+                                    font.pixelSize: 10
+                                    font.bold: true
+                                    color: Colors.colBg
+                                }
+                            }
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: modelData.d
+                                font.family: root.fontFamily
+                                font.pixelSize: 10
+                                color: Colors.colBrightBlack
+                            }
+                        }
                     }
                 }
             }
         }
+
+	CornerBrackets {}
     }
 }
-

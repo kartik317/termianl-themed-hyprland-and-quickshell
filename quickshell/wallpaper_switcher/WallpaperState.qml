@@ -62,6 +62,7 @@ pkill swaync
 echo "${path}" > ~/.cache/current_wallpaper
 echo "image" > ~/.cache/current_wallpaper_type
 cp "${path}" ~/.cache/wallpaper_frame.png
+cp ~/.cache/wallpaper_frame.png /var/lib/greeter-wallpaper/wallpaper_frame.png
 `
         applyProcess.command = ["bash", "-c", script]
         applyProcess.running = false

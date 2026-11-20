@@ -4,19 +4,20 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import "./media_controls"
+import "./system_info"
 import "../theme"
 
 PanelWindow {
     id: root
     Process {
-        id: appLauncherProcess
-        command: ["qs", "ipc", "call", "applauncher", "toggle"]
+	id: appLauncherProcess
+	command: ["qs", "ipc", "call", "applauncher", "toggle"]
     }
     WlrLayershell.namespace: "bar"
     anchors {
-        top: true
-        left: true
-        right: true
+	top: true
+	left: true
+	right: true
     }
     implicitHeight: 45 
     color: "transparent"
@@ -26,20 +27,20 @@ PanelWindow {
     readonly property real pillRadius: 0
     readonly property color pillBg: Qt.alpha(Colors.colBg, 0.65)
     RowLayout {
-        anchors.fill: parent
-        anchors.margins: 4
-        spacing: 8
-        // Left Section: Logo, Workspaces
-        BorderedPill {
-            Layout.fillHeight: true
-            color: root.pillBg
-            radius: root.pillRadius
-            implicitWidth: leftRow.implicitWidth + 16
-            RowLayout {
-                id: leftRow
-                anchors.centerIn: parent
-                spacing: 8
-                // Logo
+	anchors.fill: parent
+	anchors.margins: 4
+	spacing: 8
+	// Left Section: Logo, Workspaces
+	BorderedPill {
+	    Layout.fillHeight: true
+	    color: root.pillBg
+	    radius: root.pillRadius
+	    implicitWidth: leftRow.implicitWidth + 16
+	    RowLayout {
+		id: leftRow
+		anchors.centerIn: parent
+		spacing: 8
+		// Logo
 		Rectangle {
 		    Layout.preferredWidth: 20
 		    Layout.preferredHeight: 20
@@ -59,48 +60,47 @@ PanelWindow {
 			}
 		    }
 		}
-                Separator {}
-                // Workspaces
-                Workspaces {
-                    fontFamily: root.fontFamily
-                    fontSize: root.fontSize
-                } 
-            }
+		// Workspaces
+		Workspaces {
+		    fontFamily: root.fontFamily
+		    fontSize: root.fontSize
+		} 
+	    }
 	}
 	// App Shortcuts Pill
-        BorderedPill {
-            Layout.fillHeight: true
-            color: root.pillBg
-            radius: root.pillRadius
-            implicitWidth: shortcutsRow.implicitWidth + 16
-            RowLayout {
-                id: shortcutsRow
-                anchors.centerIn: parent
-                AppShortcuts {}
-            }
-        }
-	
-        // Center Spacer (Pushes left and right sections apart)
-        Item {
-            Layout.fillWidth: true
-        }
-        // Center Section: Media Controls
-        BorderedPill {
-            Layout.fillHeight: true
-            color: root.pillBg
-            radius: root.pillRadius
-            implicitWidth: mediaRow.implicitWidth
-            RowLayout {
-                id: mediaRow
-                anchors.centerIn: parent
-                MediaControls {}
-            }
-        } 
-	
+	BorderedPill {
+	    Layout.fillHeight: true
+	    color: root.pillBg
+	    radius: root.pillRadius
+	    implicitWidth: shortcutsRow.implicitWidth + 16
+	    RowLayout {
+		id: shortcutsRow
+		anchors.centerIn: parent
+		AppShortcuts {}
+	    }
+	}
+
+	// Center Spacer (Pushes left and right sections apart)
+	Item {
+	    Layout.fillWidth: true
+	}
+	// Center Section: Media Controls
+	BorderedPill {
+	    Layout.fillHeight: true
+	    color: root.pillBg
+	    radius: root.pillRadius
+	    implicitWidth: mediaRow.implicitWidth
+	    RowLayout {
+		id: mediaRow
+		anchors.centerIn: parent
+		MediaControls {}
+	    }
+	} 
+
 	// System info
 	BorderedPill {
 	    Layout.fillHeight: true
-	    Layout.preferredWidth: 320
+	    implicitWidth: sysInfoRow.implicitWidth + 24
 	    color: root.pillBg
 	    radius: root.pillRadius
 	    RowLayout {
@@ -113,22 +113,33 @@ PanelWindow {
 		}
 	    }
 	} 
-        // Network, Battery & Clock Pill
-        BorderedPill {
-            Layout.fillHeight: true
-            implicitWidth: statusRow.implicitWidth + 24
-            color: root.pillBg
-            radius: root.pillRadius
-            RowLayout {
-                id: statusRow
-                anchors.centerIn: parent
-                spacing: 8
-                Network {}
-                Separator {}
+	// Network, Battery & Volume Pill
+	BorderedPill {
+	    Layout.fillHeight: true
+	    implicitWidth: statusRow.implicitWidth + 24
+	    color: root.pillBg
+	    radius: root.pillRadius
+	    RowLayout {
+		id: statusRow
+		anchors.centerIn: parent
+		spacing: 8
+		Network {}
+		Separator {}
 		Battery {}
 		Separator {}
 		Volume {}
-                Separator {}
+	    }
+	}
+
+	// Clock Pill
+        BorderedPill {
+            Layout.fillHeight: true
+            implicitWidth: clockRow.implicitWidth + 24
+            color: root.pillBg
+            radius: root.pillRadius
+            RowLayout {
+                id: clockRow
+                anchors.centerIn: parent
                 Clock {}
             }
         }

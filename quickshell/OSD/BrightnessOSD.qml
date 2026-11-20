@@ -15,6 +15,11 @@ PanelWindow {
     property int  brightness:      0
     property int  maxBrightness:   100
 
+    // ── Style ───────────────────────────────────────────────────────────────
+    readonly property string fontFamily: "JetBrainsMono Nerd Font"
+    readonly property color accent: Colors.colCyan
+    readonly property color line: Qt.alpha(Colors.colCyan, 0.35)
+
     WlrLayershell.layer:         WlrLayer.Overlay
     WlrLayershell.namespace:     "qs-brightness-osd-noanim"
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
@@ -28,7 +33,6 @@ PanelWindow {
     mask: Region {
         item: root.osdVisible ? maskCover : null
     }
-    // it's a sick trick right :)
     Item {
         id: maskCover
         anchors.fill: parent
@@ -95,12 +99,12 @@ PanelWindow {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    //  OSD card — instant show/hide, no slide/fade
+    //  OSD card: instant show/hide, no slide/fade
     // ═══════════════════════════════════════════════════════════════════════
     Rectangle {
         id: osdCard
-        width:  400
-        height: 56
+        width:  440
+        height: 52
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom:           parent.bottom
         anchors.bottomMargin:     22
@@ -108,63 +112,87 @@ PanelWindow {
         visible: root.osdVisible
 
         radius: 0
-        color: "transparent"
-        border.color: Colors.colCyan
+        color: Qt.alpha(Colors.colBg, 0.88)
+        border.color: root.line
         border.width: 1
 
-        // ── Inner fill (matches launcher/power menu/volume OSD) ─────────────
-        Rectangle {
-            anchors.fill: parent
-            anchors.margins: 1
-            color: Qt.rgba(Colors.colBg.r, Colors.colBg.g, Colors.colBg.b, 0.8)
-            radius: 0
-            clip: true
+        RowLayout {
+            anchors {
+                fill: parent
+                leftMargin: 12
+                rightMargin: 12
+            }
+            spacing: 10
 
-            RowLayout {
-                anchors { fill: parent; leftMargin: 14; rightMargin: 14 }
-                spacing: 12
+            // brightness icon, fixed width so the meter doesn't shift
+            Text {
+                Layout.preferredWidth: 20
+                horizontalAlignment: Text.AlignHCenter
+                text: root.brightness > 60 ? "\uf5fe"
+                    : root.brightness > 20 ? "\uf042"
+                    :                         "\uf5dd"
+                font.pixelSize: 16
+                font.family:    root.fontFamily
+                color: root.accent
+            }
+
+            // blocky inverted tag
+            Rectangle {
+                implicitWidth: tagText.implicitWidth + 14
+                implicitHeight: tagText.implicitHeight + 4
+                color: root.accent
 
                 Text {
-                    text: "\udb80\udcdc" 
-                    font.pixelSize: 16
-                    font.family:    "JetBrainsMono Nerd Font"
-                    color: Colors.colBlue
+                    id: tagText
+                    anchors.centerIn: parent
+                    text: "BRT"
+                    font.family: root.fontFamily
+                    font.pixelSize: 11
+                    font.bold: true
+                    font.letterSpacing: 1
+                    color: Colors.colBg
                 }
+	    }
 
-                // ── Segmented brightness meter (matches volume OSD style) ────
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 3
+	    // ── Segmented brightness meter ──────────────────────────────────
+            Row {
+                id: meter
+                Layout.fillWidth: true
+                Layout.preferredHeight: 12
+                spacing: 3
 
-                    readonly property int segments: 20
-                    readonly property int filledSegments: Math.round(Math.min(root.brightness / 100.0, 1.0) * segments)
+                readonly property int segments: 20
+                readonly property int filledSegments: Math.round(Math.min(root.brightness / 100.0, 1.0) * segments)
 
-                    Repeater {
-                        model: parent.segments
-                        delegate: Rectangle {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 10
-                            radius: 0
-                            border.width: 1
-                            border.color: Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.1)
-                            color: index < parent.filledSegments
-                                   ? Colors.colBlue
-                                   : Qt.rgba(Colors.colFg.r, Colors.colFg.g, Colors.colFg.b, 0.12)
-                        }
+                // Calculate exact width for each square based on total available width minus total spacing
+                readonly property real availableWidth: width - (spacing * (segments - 1))
+                readonly property real segmentWidth: Math.floor(availableWidth / segments)
+
+                Repeater {
+                    model: meter.segments
+                    delegate: Rectangle {
+                        width: meter.segmentWidth
+                        height: 12
+                        radius: 0
+                        color: index < meter.filledSegments
+                               ? root.accent
+                               : Qt.alpha(Colors.colCyan, 0.12)
                     }
                 }
-
-                Text {
-                    text:                  root.brightness + "%"
-                    font.pixelSize:        12
-                    font.family:           "JetBrainsMono Nerd Font"
-                    font.weight:           Font.Bold
-                    color:                 Colors.colFg
-                    Layout.preferredWidth: 44
-                    horizontalAlignment:   Text.AlignRight
-                }
+            }
+            // value, zero-padded so the width never changes: 005%, 042%, 100%
+            Text {
+                Layout.preferredWidth: 44
+                horizontalAlignment: Text.AlignRight
+                text: String(root.brightness).padStart(3, "0") + "%"
+                font.pixelSize: 12
+                font.family: root.fontFamily
+                font.bold: true
+                color: Colors.colFg
             }
         }
+
+        // last child so it draws on top of the content
+        CornerBrackets {}
     }
 }
-

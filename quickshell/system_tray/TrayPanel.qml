@@ -24,6 +24,10 @@ PanelWindow {
     // while reserving no space of our own (exclusiveZone stays 0).
     exclusionMode: ExclusionMode.Normal
 
+    // ── Style ────────────────────────────────────────────────────────────────
+    readonly property string fontFamily: TrayState.fontFamily
+    readonly property color dim: Qt.alpha(Colors.colCyan, 0.35)
+
     // The window is always full size while visible; the frame inside it is
     // what animates (grows from the top-right corner).
     readonly property int fullW: 380
@@ -214,13 +218,16 @@ PanelWindow {
         // never smaller than 2px so the cyan "CRT line" is always visible
         width: Math.max(2, win.fullW * win.openW)
         height: Math.max(2, win.fullH * win.openH)
+
+        // flick only affects the frame as a whole; the background alpha is
+        // set below so text stays full brightness
         opacity: win.flick
         clip: true
 
         radius: 0
-        color: Qt.alpha(Colors.colBg, 0.65)
+        color: Qt.alpha(Colors.colBg, 0.88)
         border.width: 1
-        border.color: Colors.colCyan
+        border.color: win.dim
 
         FocusScope {
             id: keys
@@ -243,32 +250,64 @@ PanelWindow {
                 anchors { right: parent.right; top: parent.top; margins: 1 }
                 spacing: 0
 
-                // header
-                Rectangle {
+                // ── Title bar ───────────────────────────────────────────────
+                Item {
                     Layout.fillWidth: true
-                    implicitHeight: 28
-                    color: Colors.colCyan
+                    Layout.preferredHeight: 34
 
-                    Text {
-                        anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
-                        text: TrayState.inMenu
-                            ? "tray/" + TrayState.labelFor(TrayState.menuOwner).toLowerCase()
-                            : "systray"
-                        color: Colors.colBg
-                        font.family: TrayState.fontFamily
-                        font.pixelSize: 13
-                        font.bold: true
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        spacing: 8
+
+                        // blocky inverted tag
+                        Rectangle {
+                            implicitWidth: titleTag.implicitWidth + 14
+                            implicitHeight: titleTag.implicitHeight + 4
+                            color: Colors.colCyan
+
+                            Text {
+                                id: titleTag
+                                anchors.centerIn: parent
+                                text: TrayState.inMenu ? "MENU" : "TRAY"
+                                font.family: win.fontFamily
+                                font.pixelSize: 11
+                                font.bold: true
+                                font.letterSpacing: 1
+                                color: Colors.colBg
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                            text: TrayState.inMenu
+                                ? "tray/" + TrayState.labelFor(TrayState.menuOwner).toLowerCase()
+                                : ("linuxguy") + "@systray"
+                            font.family: win.fontFamily
+                            font.pixelSize: 11
+                            color: Colors.colBrightBlack
+                        }
+
+                        Text {
+                            text: String(TrayState.count).padStart(2, "0")
+                            font.family: win.fontFamily
+                            font.pixelSize: 11
+                            font.bold: true
+                            color: Colors.colCyan
+                        }
                     }
-                    Text {
-                        anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
-                        text: "[" + TrayState.count + "]"
-                        color: Colors.colBg
-                        font.family: TrayState.fontFamily
-                        font.pixelSize: 13
+
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: 1
+                        color: win.dim
                     }
                 }
 
-                // entries
+                // ── Entries ─────────────────────────────────────────────────
                 Repeater {
                     model: TrayState.model
 
@@ -282,7 +321,7 @@ PanelWindow {
                         readonly property bool dim: TrayState.inMenu && !modelData.enabled
 
                         Layout.fillWidth: true
-                        implicitHeight: isSep ? 9 : 28
+                        implicitHeight: isSep ? 9 : 30
 
                         // hard step reveal (no fade) to match the instant-swap style
                         opacity: index < win.revealRows ? 1 : 0
@@ -292,11 +331,10 @@ PanelWindow {
                             visible: row.isSep
                             anchors { left: parent.left; right: parent.right; verticalCenter: parent.verticalCenter; margins: 10 }
                             height: 1
-                            color: Colors.colCyan
-                            opacity: 0.35
+                            color: Qt.alpha(Colors.colCyan, 0.2)
                         }
 
-                        // row body
+                        // row body: selected = solid cyan block, instant swap
                         Rectangle {
                             visible: !row.isSep
                             anchors.fill: parent
@@ -305,29 +343,31 @@ PanelWindow {
                             MouseArea {
                                 anchors.fill: parent
                                 hoverEnabled: true
+                                cursorShape: row.dim ? Qt.ArrowCursor : Qt.PointingHandCursor
                                 onEntered: if (row.modelData && !row.dim) TrayState.sel = row.index
                                 onClicked: { TrayState.sel = row.index; TrayState.activate() }
                             }
 
                             RowLayout {
-                                anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                                anchors { fill: parent; leftMargin: 10; rightMargin: 14 }
                                 spacing: 8
 
                                 Text {
                                     text: row.isSel ? ">" : " "
-                                    color: row.isSel ? Colors.colBg : Colors.colCyan
-                                    font.family: TrayState.fontFamily
+                                    color: Colors.colBg
+                                    font.family: win.fontFamily
                                     font.pixelSize: 13
                                     font.bold: true
                                 }
 
+                                // 1-9 jump number, dim (fixed width so rows stay aligned)
                                 Text {
-                                    visible: !TrayState.inMenu && row.index < 9
-                                    text: (row.index + 1).toString()
-                                    color: row.isSel ? Colors.colBg : Colors.colCyan
-                                    opacity: row.isSel ? 1 : 0.6
-                                    font.family: TrayState.fontFamily
-                                    font.pixelSize: 13
+                                    visible: !TrayState.inMenu
+                                    Layout.preferredWidth: 10
+                                    text: row.index < 9 ? (row.index + 1).toString() : ""
+                                    color: row.isSel ? Colors.colBg : Colors.colBrightBlack
+                                    font.family: win.fontFamily
+                                    font.pixelSize: 12
                                 }
 
                                 Image {
@@ -343,58 +383,126 @@ PanelWindow {
                                     Layout.fillWidth: true
                                     text: row.modelData ? TrayState.labelFor(row.modelData) : ""
                                     elide: Text.ElideRight
-                                    color: row.isSel ? Colors.colBg : Colors.colFg
-                                    opacity: row.dim ? 0.4 : 1
-                                    font.family: TrayState.fontFamily
+                                    color: row.isSel ? Colors.colBg
+                                         : row.dim ? Colors.colBrightBlack
+                                         : Colors.colFg
+                                    font.family: win.fontFamily
                                     font.pixelSize: 13
+                                    font.bold: row.isSel
                                 }
 
+                                // tray item that has a context menu: boxed MENU tag
+                                Rectangle {
+                                    readonly property bool shown: !TrayState.inMenu
+                                        && row.modelData && row.modelData.hasMenu
+                                    visible: shown
+                                    Layout.preferredWidth: 40
+                                    Layout.preferredHeight: 16
+                                    color: row.isSel ? Colors.colBg : Qt.alpha(Colors.colCyan, 0.15)
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "MENU"
+                                        font.family: win.fontFamily
+                                        font.pixelSize: 9
+                                        font.bold: true
+                                        color: Colors.colCyan
+                                    }
+                                }
+
+                                // menu entry that opens a submenu
                                 Text {
-                                    visible: (!TrayState.inMenu && row.modelData && row.modelData.hasMenu)
-                                          || (TrayState.inMenu && row.modelData && row.modelData.hasChildren)
-                                    text: TrayState.inMenu ? "[>]" : "[menu]"
+                                    visible: TrayState.inMenu && row.modelData && row.modelData.hasChildren
+                                    text: ">"
                                     color: row.isSel ? Colors.colBg : Colors.colCyan
-                                    font.family: TrayState.fontFamily
-                                    font.pixelSize: 12
+                                    font.family: win.fontFamily
+                                    font.pixelSize: 13
+                                    font.bold: true
                                 }
                             }
                         }
                     }
                 }
 
-                // empty state
+                // ── Empty state ─────────────────────────────────────────────
                 Text {
                     visible: TrayState.count === 0
                     Layout.fillWidth: true
                     Layout.margins: 10
-                    text: "> no tray items"
-                    color: Colors.colFg
-                    opacity: 0.6
-                    font.family: TrayState.fontFamily
-                    font.pixelSize: 13
+                    horizontalAlignment: Text.AlignHCenter
+                    text: "-- no tray items --"
+                    color: Colors.colBrightBlack
+                    font.family: win.fontFamily
+                    font.pixelSize: 12
                 }
 
-                // footer
-                Rectangle {
+                // ── Footer ──────────────────────────────────────────────────
+                Item {
                     Layout.fillWidth: true
-                    implicitHeight: 1
-                    color: Colors.colCyan
-                    opacity: 0.35
-                }
-                Text {
-                    Layout.fillWidth: true
-                    Layout.margins: 8
-                    text: TrayState.inMenu
-                        ? "j/k move  enter run  h back  esc close"
-                        : "j/k move  enter open  l menu  1-9 jump"
-                    color: Colors.colFg
-                    opacity: 0.55
-                    elide: Text.ElideRight
-                    font.family: TrayState.fontFamily
-                    font.pixelSize: 11
+                    Layout.preferredHeight: 28
+
+                    Rectangle {
+                        anchors.top: parent.top
+                        width: parent.width
+                        height: 1
+                        color: win.dim
+                    }
+
+                    Row {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        spacing: 12
+
+                        Repeater {
+                            model: TrayState.inMenu
+                                ? [
+                                    { k: "j/k", d: "move" },
+                                    { k: "⏎",   d: "run" },
+                                    { k: "h",   d: "back" },
+                                    { k: "ESC", d: "close" }
+                                  ]
+                                : [
+                                    { k: "j/k", d: "move" },
+                                    { k: "⏎",   d: "open" },
+                                    { k: "l",   d: "menu" },
+                                    { k: "1-9", d: "jump" }
+                                  ]
+
+                            Row {
+                                spacing: 5
+
+                                Rectangle {
+                                    width: keyText.implicitWidth + 8
+                                    height: keyText.implicitHeight + 2
+                                    color: Colors.colCyan
+
+                                    Text {
+                                        id: keyText
+                                        anchors.centerIn: parent
+                                        text: modelData.k
+                                        font.family: win.fontFamily
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                        color: Colors.colBg
+                                    }
+                                }
+
+                                Text {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: modelData.d
+                                    font.family: win.fontFamily
+                                    font.pixelSize: 10
+                                    color: Colors.colBrightBlack
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
+
+        // last child so it draws on top of the content
+        CornerBrackets {}
     }
 }
-

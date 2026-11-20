@@ -324,8 +324,6 @@ PanelWindow {
 		anchors.fill: parent
 	    }
 
-	    // fixed size anchored bottom-center, so content is wiped in as the
-	    // panel grows instead of reflowing
 	    ColumnLayout {
 		width: root.panelW - 2
 		height: root.panelH - 2
@@ -376,7 +374,6 @@ PanelWindow {
 			    Layout.fillWidth: true
 			}
 
-			// 012/084
 			Text {
 			    text: String(root.filteredApps.length).padStart(3, "0")
 			    font.family: root.fontFamily
@@ -491,7 +488,6 @@ PanelWindow {
 			    width: listView.width
 			    height: root.itemH
 
-			    // hard step reveal (no fade) to match the instant-swap style
 			    opacity: index < root.revealRows ? 1 : 0
 
 			    readonly property bool sel: root.selectedIndex === index
@@ -504,7 +500,6 @@ PanelWindow {
 				anchors.fill: parent
 				radius: 0
 
-				// selected = solid cyan block, hover = faint block, instant swaps
 				color: appRow.sel ? Colors.colCyan
 				: appRow.hovered ? Qt.alpha(Colors.colCyan, 0.15)
 				: "transparent"

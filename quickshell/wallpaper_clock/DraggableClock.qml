@@ -11,11 +11,15 @@ Item {
     property int posY: 50
     required property var screen
 
-    property int padding: 16
+    property int padding: 20
+
+    readonly property bool dragging: mouse.drag.active
+    readonly property int bracketLen: 10
+    readonly property int bracketThickness: 2
 
     IpcHandler {
         target: "clock-widget"
-        function toggle() {
+        function toggle(): void {
             ClockState.toggle()
         }
     }
@@ -29,8 +33,10 @@ Item {
     }
 
     MouseArea {
+        id: mouse
         anchors.fill: parent
-        cursorShape: Qt.SizeAllCursor
+        hoverEnabled: true
+        cursorShape: root.dragging ? Qt.ClosedHandCursor : Qt.SizeAllCursor
         drag.target: root
         drag.axis: Drag.XAndYAxis
         drag.minimumX: 0
@@ -39,12 +45,26 @@ Item {
         drag.maximumY: root.screen.height - root.height
     }
 
+    // Frame: dim at rest, brighter on hover, solid while dragging (instant swaps)
     Rectangle {
         anchors.fill: parent
         radius: 0
-        color: Qt.alpha(Colors.colBg, 0.5)
-        border.color: Qt.alpha(Colors.colCyan, 0.85)
+        color: Qt.alpha(Colors.colBg, root.dragging ? 0.75 : 0.55)
         border.width: 1
+        border.color: Qt.alpha(Colors.colCyan,
+            root.dragging ? 1.0 : mouse.containsMouse ? 0.6 : 0.35)
+    }
+
+    // Corner brackets (top-left, bottom-right), same as the bar pills
+    Rectangle { x: 0; y: 0; width: root.bracketLen; height: root.bracketThickness; color: Colors.colCyan }
+    Rectangle { x: 0; y: 0; width: root.bracketThickness; height: root.bracketLen; color: Colors.colCyan }
+    Rectangle {
+        x: root.width - width; y: root.height - height
+        width: root.bracketLen; height: root.bracketThickness; color: Colors.colCyan
+    }
+    Rectangle {
+        x: root.width - width; y: root.height - height
+        width: root.bracketThickness; height: root.bracketLen; color: Colors.colCyan
     }
 
     WallpaperClock {

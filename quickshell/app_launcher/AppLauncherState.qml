@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick
-import QtCore
 import Quickshell
+import Quickshell.Io
 
 QtObject {
     id: root
@@ -9,13 +9,32 @@ QtObject {
     property bool launcherVisible: false
     property var recentIds: []
 
-    property var _settings: Settings {
-        category: "AppLauncher"
-        property string recentIdsSerialized: "[]"
-    }
+    readonly property string cachePath: Quickshell.env("HOME") + "/.config/quickshell/app_launcher_recents.json"
 
     Component.onCompleted: {
-        recentIds = JSON.parse(_settings.recentIdsSerialized)
+        loadProcess.running = true
+    }
+
+    objectName: "appLauncherState"
+
+    property Process loadProcess: Process {
+        command: ["cat", root.cachePath]
+        stdout: SplitParser {
+            onRead: data => {
+                try {
+                    if (data.trim()) {
+                        root.recentIds = JSON.parse(data.trim())
+                    }
+                } catch (e) {
+                    console.warn("Failed to parse recent apps cache:", e)
+                }
+            }
+        }
+    }
+
+    property Process saveProcess: Process {
+        property string payload: "[]"
+        command: ["sh", "-c", "mkdir -p $(dirname '" + root.cachePath + "') && echo '" + payload + "' > '" + root.cachePath + "'"]
     }
 
     function toggle() { launcherVisible = !launcherVisible }
@@ -29,11 +48,14 @@ QtObject {
         list.unshift(id)
         if (list.length > 12) list = list.slice(0, 12)
         recentIds = list
-        _settings.recentIdsSerialized = JSON.stringify(list)
+
+        saveProcess.payload = JSON.stringify(list)
+        saveProcess.running = true
     }
 
     function clearRecents() {
         recentIds = []
-        _settings.recentIdsSerialized = "[]"
+        saveProcess.payload = "[]"
+        saveProcess.running = true
     }
 }

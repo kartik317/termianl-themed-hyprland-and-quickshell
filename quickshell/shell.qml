@@ -11,7 +11,7 @@ import "./power_menu"
 import "./app_launcher"
 import "./OSD"
 import "./wallpaper_clock"
-import "./voice_assistant"
+//import "./voice_assistant"
 import "./clipboard"
 import "./system_tray"
 import "./notifications"
@@ -95,12 +95,17 @@ ShellRoot {
 
     LockScreen {} 
 
-    NovaPanel {}
+    //NovaPanel {}
 
     WallpaperSwitcher {}
 
     LiveWallpaperSwitcher {}
 
     NotificationCenter {}
+
+    Component.onCompleted: {
+        Qt.application.organizationName = "SickRice"
+        Qt.application.organizationDomain = "quickshell.desktop"
+    }
 }
 
